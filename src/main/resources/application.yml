@@ -1,0 +1,48 @@
+app:
+  version: @project.version@
+  buildtime: @maven.build.timestamp@
+  pooled-db: true
+  datasource:
+    h2datasource:
+      url: jdbc:mysql://localhost:3306/weather
+      username: root
+      password: ${MySQL-PASSWORD}
+      configuration:
+        pool-size: 30
+    cache-db:
+      url: jdbc:mysql://localhost:3306/weather
+      username: root
+      password: ${MySQL-PASSWORD}
+      configuration:
+        pool-size: 30
+server:
+  port: 2122
+
+retrofit:
+  integration:
+    cacheSizeInMb: 50
+    cacheDirectory: "retrofit/cache"
+    longRunningReadTimeout: 300
+    endpoints:
+      - serviceName: OpenWeatherMap_weather_API
+      - baseUrl: https://api.openweathermap.org/data/2.5/weather
+      - apiKey: ${OpenWeatherMap_API_key}
+      - serviceName: OpenWeatherMap_geocoding_API
+      - baseUrl: http://api.openweathermap.org/geo/1.0/direct
+      - apiKey: ${OpenWeatherMap_API_key}
+
+
+spring:
+  jpa:
+    database: default
+  flyway:
+    out-of-order: true
+    ignore-future-migrations: true
+    ignore-ignored-migrations: true
+    ignore-missing-migrations: true
+    baseline-on-migrate: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/weather
+    username: root
+    password: ${MySQL-PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
