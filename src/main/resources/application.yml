@@ -30,6 +30,9 @@ retrofit:
       - serviceName: OpenWeatherMap_geocoding_API
       - baseUrl: http://api.openweathermap.org/geo/1.0/direct
       - apiKey: ${OpenWeatherMap_API_key}
+      - serviceName: IPStack_IPGeolocation_API
+      - baseUrl: http://api.ipstack.com
+      - apiKey: ${IPStack.com_API_key}
 
 
 spring:
