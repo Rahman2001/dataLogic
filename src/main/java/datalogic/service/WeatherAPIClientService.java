@@ -9,10 +9,10 @@ import retrofit2.http.Url;
 import java.util.concurrent.CompletableFuture;
 
 public interface WeatherAPIClientService { //this client service requests weather information for particular location.
-    @GET("{baseURL}" + "{lat}" + "{lon}" + "{appid}")
+    @GET("{baseURL}" + "{lat}" + "{lon}" + "{appid}" + "&units=metric")
     CompletableFuture<WeatherData> getWeatherData(@Url @Path(value = "baseURL") String baseURL,
-                                                  @Query(value = "lat") String latitude,
-                                                  @Query(value = "lon") String longitude,
+                                                  @Query(value = "lat") Double latitude,
+                                                  @Query(value = "lon") Double longitude,
                                                   @Query(value = "appid") String API_key);
 
 }

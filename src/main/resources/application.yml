@@ -24,16 +24,21 @@ retrofit:
     cacheDirectory: "retrofit/cache"
     longRunningReadTimeout: 300
     endpoints:
-      - serviceName: OpenWeatherMap_weather_API
+      - serviceName: OpenWeatherMap_currentWeather_API
       - baseUrl: https://api.openweathermap.org/data/2.5/weather
       - apiKey: ${OpenWeatherMap_API_key}
-      - serviceName: OpenWeatherMap_geocoding_API
+      - serviceName: OpenWeatherMap_hourlyWeather_API
+      - baseUrl: https://pro.openweathermap.org/data/2.5/forecast/hourly
+      - apiKey: ${OpenWeatherMap_API_key}
+      - serviceName: OpenWeatherMap_dailyWeather_API
+      - baseUrl: https://api.openweathermap.org/data/2.5/forecast/daily
+      - apiKey: ${OpenWeatherMap_API_key}
+      - serviceName: Geocoding_API
       - baseUrl: http://api.openweathermap.org/geo/1.0/direct
       - apiKey: ${OpenWeatherMap_API_key}
-      - serviceName: IPStack_IPGeolocation_API
+      - serviceName: IPGeolocation_API
       - baseUrl: http://api.ipstack.com
       - apiKey: ${IPStack.com_API_key}
-
 
 spring:
   jpa:

@@ -1,11 +1,15 @@
 package datalogic.config;
 
+import datalogic.service.GeocodingAPIClientService;
+import datalogic.service.IPGeolocationAPIClientService;
+import datalogic.service.WeatherAPIClientService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -58,6 +62,21 @@ public class RestServiceForRetrofit {
                 .addConverterFactory(JacksonConverterFactory.create())
                 .client(okHttpClient)
                 .build();
+    }
+
+    @Bean
+    public GeocodingAPIClientService geocodingAPIClientService() {
+        return this.retrofit.create(GeocodingAPIClientService.class);
+    }
+
+    @Bean
+    public IPGeolocationAPIClientService ipGeolocationAPIClientService() {
+        return this.retrofit.create(IPGeolocationAPIClientService.class);
+    }
+
+    @Bean
+    public WeatherAPIClientService weatherAPIClientService() {
+        return this.retrofit.create(WeatherAPIClientService.class);
     }
 
     private Map<String, EndpointProperty> createEndpointsMap(List<EndpointProperty> endpointProperties) {

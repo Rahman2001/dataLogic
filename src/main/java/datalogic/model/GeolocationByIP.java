@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class GeolocationByIP {
-    private String IP;
-    private String CITY_NAME;
-    private String COUNTRY_NAME;
-    private Long LATITUDE;
-    private Long LONGITUDE;
+    private String ip;
+    private Double latitude;
+    private Double longitude;
+    private String city;
+    private String country_name;
 }
