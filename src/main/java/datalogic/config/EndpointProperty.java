@@ -8,4 +8,5 @@ import lombok.Data;
 public class EndpointProperty {
     private String serviceName;
     private String baseUrl;
+    private String API_key;
 }
