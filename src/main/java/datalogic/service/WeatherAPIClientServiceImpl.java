@@ -8,24 +8,17 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
-
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 @Component
-public class WeatherAPIClientServiceImpl {
+public class WeatherAPIClientServiceImpl{
 
     private final WeatherAPIClientService weatherAPIClientService;
     private final Map<String, EndpointProperty> endpointPropertyMap;
 
     @Autowired
-    public WeatherAPIClientServiceImpl(WeatherAPIClientService weatherRestAPI, List<EndpointProperty> restEndpoints) {
+    public WeatherAPIClientServiceImpl(WeatherAPIClientService weatherRestAPI, List<EndpointProperty> restEndpoints, ServiceUtil serviceUtil) {
         this.weatherAPIClientService = weatherRestAPI;
-        this.endpointPropertyMap = groupsEndpoints(restEndpoints);
-    }
-
-    private Map<String, EndpointProperty> groupsEndpoints(List<EndpointProperty> endpointProperties) {
-        return endpointProperties.stream().collect(toImmutableMap(EndpointProperty::getServiceName, Function.identity()));
+        this.endpointPropertyMap = serviceUtil.groupsEndpoints(restEndpoints);
     }
 
     public Weather getCurrentWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {

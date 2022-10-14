@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DailyWeather extends Weather{
-    private Integer cnt;
-    private LocalDateTime date_and_time;
+    private Integer days_to_forecast;
+    private LocalDateTime date_and_time_of_update;
     private List<Weather> daily_weather;
 
     public void addDailyWeather(Weather weather) {

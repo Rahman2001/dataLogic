@@ -13,8 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HourlyWeather extends Weather{
-    private Integer cnt;
-    private LocalDateTime date_and_time;
+    private Integer hours_to_forecast;
+    private LocalDateTime date_and_time_of_update;
     private List<Weather> hourly_weather;
 
     public void addHourlyWeather(Weather weather) {

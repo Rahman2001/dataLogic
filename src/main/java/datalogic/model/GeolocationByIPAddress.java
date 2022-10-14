@@ -3,7 +3,7 @@ package datalogic.model;
 import lombok.Data;
 
 @Data
-public class GeolocationByIP {
+public class GeolocationByIPAddress {
     private String ip;
     private Double latitude;
     private Double longitude;
