@@ -1,9 +1,15 @@
 package datalogic.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class WeatherData {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Weather {
     private String description;
     private Integer temp;
     private Integer temp_min;
@@ -13,5 +19,6 @@ public class WeatherData {
     private Integer humidity;
     private Integer wind;
     private Integer clouds;
+    private String city;
     private String country;
 }
