@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 @Slf4j
 @Configuration
 public class FlywayH2Config {
-    private DataSource h2Datasource;
+    private final DataSource h2Datasource;
 
     @Autowired
     public FlywayH2Config(@Qualifier("cacheDbDatasource") DataSource h2Datasource) { // we get a bean called "cacheDbDataSource" and inject it into method argument.

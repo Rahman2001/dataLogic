@@ -12,9 +12,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyWeather extends Weather{
-    private Integer days_to_forecast;
-    private LocalDateTime date_and_time_of_update;
+public class DailyWeather {
+    private Integer forecasted_total_days;
+    private LocalDateTime dates_between;
     private List<Weather> daily_weather;
 
     public void addDailyWeather(Weather weather) {

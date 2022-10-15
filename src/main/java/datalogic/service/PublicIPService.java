@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 @Service
-public class PublicIPService { //locates user's current public ip address by requesting to the given url below.
+public class PublicIPService { //locates user's current public ip address by making a request to the given url below.
     private static String PUBLIC_IP_ADDRESS;
 
     protected String getPUBLIC_IP_ADDRESS() {
