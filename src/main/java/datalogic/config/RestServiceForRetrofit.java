@@ -2,6 +2,7 @@ package datalogic.config;
 
 import datalogic.service.GeocodingAPIClientService;
 import datalogic.service.IPGeolocationAPIClientService;
+import datalogic.service.ServiceUtil;
 import datalogic.service.WeatherAPIClientService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
