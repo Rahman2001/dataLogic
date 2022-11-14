@@ -55,7 +55,7 @@ public class FlywayMigrationService {
         }
     }
 
-    public Boolean insertDataIntoTable(@NotNull String sqlScript) {
+    public Boolean insertDataIntoFile(@NotNull String sqlScript) {
         String tableName = sqlScript.replaceAll("\\s*INSERT\\s+INTO\\s+", "").split("\\s+")[0];
         String tableVersion = this.getTableVersionBYTableName(tableName);
 
@@ -90,7 +90,7 @@ public class FlywayMigrationService {
     }
 
     // find the greatest value of version in third digit and increases that digit for creation of new version. (ex.: V3_0_2 -> V3_0_3)
-    public Long findTheGreatestInThirdDigitOfVersion(String[] fileNames, String tableVersion) {
+    private Long findTheGreatestInThirdDigitOfVersion(String[] fileNames, String tableVersion) {
         fileNames = Arrays.stream(fileNames).sorted().toArray(String[]::new);
         String thirdDigit = fileNames[fileNames.length-1].replaceAll(tableVersion + "_\\d+_", "").split("__")[0];
         Long thirdDigitInLong = Long.valueOf(thirdDigit);

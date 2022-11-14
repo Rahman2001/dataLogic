@@ -16,9 +16,6 @@ public class FlywayMigrationServiceTests {
     private FlywayMigrationService flywayMigrationService;
 
     public void findThirdDigitVersionTest() {
-        String[] fileNames = {"V3_0_1__HourlyWeather_of_Ankara.sql"};
-        assertEquals(this.flywayMigrationService.findTheGreatestInThirdDigitOfVersion(fileNames, "V3"),
-                1);
     }
 
 }

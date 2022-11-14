@@ -2,13 +2,11 @@ package datalogic.config;
 
 import datalogic.service.GeocodingAPIClientService;
 import datalogic.service.IPGeolocationAPIClientService;
-import datalogic.service.ServiceUtil;
 import datalogic.service.WeatherAPIClientService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,11 +52,11 @@ public class RestServiceForRetrofit {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .readTimeout(RETROFIT_DEFAULT_READ_TIMEOUT, TimeUnit.SECONDS)
                 .connectTimeout(60L, TimeUnit.SECONDS)
-                .addInterceptor()
-                .addInterceptor()
+                .addInterceptor(new CorrelationIdHeaderInterceptor())
+                .addInterceptor(new RequestLoggerInterceptor())
                 .build();
 
-         return new Retrofit.Builder()
+        return new Retrofit.Builder()
                 .baseUrl(endpointProperty.getBaseUrl())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .client(okHttpClient)
