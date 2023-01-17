@@ -1,26 +1,39 @@
 package ConfigTests;
 
+import datalogic.DataLogicApplication;
 import datalogic.config.RetrofitConfig;
-import lombok.extern.slf4j.Slf4j;
+import datalogic.config.RetrofitProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RetrofitConfig.class})
-public class RetrofitConfigTest {
+@ContextConfiguration(classes = {DataLogicApplication.class})
+@EnableConfigurationProperties(RetrofitProperties.class)
+@SpringBootTest
+public class RetrofitTests {
 
     @Autowired
     RetrofitConfig retrofitConfig;
 
+    @Autowired
+    RetrofitProperties retrofitProperties;
+
     @Test
     public void retrofitConfigTest(){
         assertNotNull(retrofitConfig);
-        assertNotNull(retrofitConfig.getEndpointProperties());
-        System.out.println(retrofitConfig.getEndpointProperties().toString());
     }
+
+    @Test
+    public void retrofitPropertyTest(){
+        assertNotNull(retrofitProperties);
+        assertNotNull(retrofitProperties.getEndpoints().get(0));
+    }
+
 }

@@ -30,6 +30,6 @@ public class IPGeolocationAPIClientServiceImpl {
 
         return this.ipGeolocationAPIClientService.locateIPAddress(endpointProperty.getBaseUrl(),
                 this.publicIPService.getPUBLIC_IP_ADDRESS(),
-                endpointProperty.getAPI_key());
+                endpointProperty.getApiKey());
     }
 }

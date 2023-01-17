@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.List;
 
 @Data
-@ConfigurationProperties("retrofit")
+@ConfigurationProperties(prefix = "retrofit")
 public class RetrofitProperties {
-    private List<EndpointProperty> endpointProperties;
+
+    private List<EndpointProperty> endpoints;
 }

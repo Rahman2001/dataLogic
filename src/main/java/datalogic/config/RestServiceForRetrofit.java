@@ -4,12 +4,15 @@ import datalogic.service.GeocodingAPIClientService;
 import datalogic.service.IPGeolocationAPIClientService;
 import datalogic.service.WeatherAPIClientService;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -22,7 +25,9 @@ import java.util.function.Function;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 @Slf4j
+@Component
 @Configuration
+@RequiredArgsConstructor
 public class RestServiceForRetrofit {
     private final Retrofit retrofit;
     private final Long RETROFIT_CACHE_SIZE;
@@ -31,8 +36,8 @@ public class RestServiceForRetrofit {
     private final Long RETROFIT_DEFAULT_READ_TIMEOUT;
 
     @Autowired
-    public RestServiceForRetrofit(final List<EndpointProperty> restEndpoints,
-                                  @NonNull @Value("${retrofit.integration.cacheSizeInMb}") Long RETROFIT_CACHE_SIZE,
+    public RestServiceForRetrofit(@Qualifier("restEndpoints") final List<EndpointProperty> restEndpoints,
+                                  @NonNull @Value("${retrofit.integration.cacheSizeInMb}") final Long RETROFIT_CACHE_SIZE,
                                   @NonNull @Value("${retrofit.integration.cacheDirectory}") String RETROFIT_CACHE_DIRECTORY,
                                   @NonNull @Value("${retrofit.integration.longRunningReadTimeout}") Long RETROFIT_LONG_READING_TIMEOUT)
     {
@@ -42,7 +47,7 @@ public class RestServiceForRetrofit {
         this.RETROFIT_DEFAULT_READ_TIMEOUT = 200L;
 
         Map<String, EndpointProperty> serviceNameMap = createEndpointsMap(restEndpoints);
-        this.retrofit = defaultSetup(serviceNameMap.get("OpenWeatherMap_geocoding_API"));
+        this.retrofit = defaultSetup(serviceNameMap.get("Geocoding_API"));
     }
 
     private Retrofit defaultSetup(EndpointProperty endpointProperty) {
@@ -52,8 +57,6 @@ public class RestServiceForRetrofit {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .readTimeout(RETROFIT_DEFAULT_READ_TIMEOUT, TimeUnit.SECONDS)
                 .connectTimeout(60L, TimeUnit.SECONDS)
-                .addInterceptor(new CorrelationIdHeaderInterceptor())
-                .addInterceptor(new RequestLoggerInterceptor())
                 .build();
 
         return new Retrofit.Builder()

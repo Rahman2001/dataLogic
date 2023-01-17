@@ -23,16 +23,16 @@ public class WeatherAPIClientServiceImpl{
 
     public Weather getCurrentWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {
         EndpointProperty endpoint = this.endpointPropertyMap.get("OpenWeatherMap_currentWeather_API");
-        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getAPI_key()).get();
+        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getApiKey()).get();
     }
 
     public Weather getHourlyWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {
         EndpointProperty endpoint = this.endpointPropertyMap.get("OpenWeatherMap_hourlyWeather_API");
-        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getAPI_key()).get();
+        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getApiKey()).get();
     }
 
     public Weather getDailyWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {
         EndpointProperty endpoint = this.endpointPropertyMap.get("OpenWeatherMap_dailyWeather_API");
-        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getAPI_key()).get();
+        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getApiKey()).get();
     }
 }

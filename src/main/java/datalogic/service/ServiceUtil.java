@@ -14,4 +14,7 @@ public class ServiceUtil {
     protected Map<String, EndpointProperty> groupsEndpoints(List<EndpointProperty> endpointProperties) {
         return endpointProperties.stream().collect(toImmutableMap(EndpointProperty::getServiceName, Function.identity()));
     }
+    protected String urlBuilder(String baseUrl, String path, String cityName, String apiKey){
+        return baseUrl + path + "?q=" + cityName + "&appid=" + apiKey;
+    }
 }

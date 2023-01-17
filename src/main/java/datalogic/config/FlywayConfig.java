@@ -18,8 +18,8 @@ import javax.sql.DataSource;
 @Configuration
 public class FlywayConfig {
 
-    @Value("${app.pooled-db}")
-    private boolean pooledDb;
+   // @Value("${app.pooled-db}")
+    private boolean pooledDb = true;
 
     @Bean
     @Primary
@@ -33,7 +33,7 @@ public class FlywayConfig {
     @Primary
     @ConfigurationProperties("app.datasource.h2datasource.configuration")
     public DataSource dataSource() {
-        if(pooledDb) { // if configurations in application.yml file are used in this class, then proceed.
+        if(pooledDb) { // if configurations in application.yaml file are used in this class, then proceed.
             return datasourceProperties().initializeDataSourceBuilder()
                     .type(HikariDataSource.class).build();
         }
