@@ -18,8 +18,8 @@ import javax.sql.DataSource;
 @Configuration
 public class FlywayConfig {
 
-   // @Value("${app.pooled-db}")
-    private boolean pooledDb = true;
+    @Value("${app.pooled-db}")
+    private boolean pooledDb;
 
     @Bean
     @Primary
@@ -34,7 +34,7 @@ public class FlywayConfig {
     @ConfigurationProperties("app.datasource.h2datasource.configuration")
     public DataSource dataSource() {
         if(pooledDb) { // if configurations in application.yaml file are used in this class, then proceed.
-            return datasourceProperties().initializeDataSourceBuilder()
+            return this.datasourceProperties().initializeDataSourceBuilder()
                     .type(HikariDataSource.class).build();
         }
         else { // otherwise, we configure our datasource manually.
@@ -58,7 +58,7 @@ public class FlywayConfig {
     @ConfigurationProperties("app.datasource.cache-db.configuration")
     public DataSource cacheDbDatasource() {
         if(pooledDb) {
-            return cacheDbDataSourceProperties().initializeDataSourceBuilder().type(HikariDataSource.class).build();
+            return this.cacheDbDataSourceProperties().initializeDataSourceBuilder().type(HikariDataSource.class).build();
         }
         else {
             final DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();

@@ -57,6 +57,8 @@ public class RestServiceForRetrofit {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .readTimeout(RETROFIT_DEFAULT_READ_TIMEOUT, TimeUnit.SECONDS)
                 .connectTimeout(60L, TimeUnit.SECONDS)
+                .addInterceptor(new RequestLoggerInterceptor())
+                .addInterceptor(new CorrelationIdHeaderInterceptor())
                 .build();
 
         return new Retrofit.Builder()

@@ -4,7 +4,6 @@ import datalogic.config.EndpointProperty;
 import datalogic.model.GeocodingByCityName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,11 +29,5 @@ public class GeocodingAPIClientServiceImpl {
     public CompletableFuture<GeocodingByCityName> getCoordinatesByCity(String cityName) {
         EndpointProperty restAPI = this.endpointPropertyMap.get("Geocoding_API");
         return this.geocodingAPIClientService.convertGeolocationToCoordinates(this.serviceUtil.urlBuilder(restAPI.getBaseUrl(), restAPI.getPath(), cityName, restAPI.getApiKey()));
-    }
-
-    @Bean
-    public Object testAboveMethod(){
-        this.getCoordinatesByCity("Ankara");
-        return new Object();
     }
 }
