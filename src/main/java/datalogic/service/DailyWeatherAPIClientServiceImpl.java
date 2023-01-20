@@ -29,8 +29,8 @@ public class DailyWeatherAPIClientServiceImpl {
     public DailyWeather getDailyWeather(Double lat, Double lon){
         EndpointProperty endpointProperty = this.endpointPropertyMap.get("OpenWeatherMap_dailyWeather_API");
         try {
-            return this.dailyWeatherAPIClientService.getDailyWeather(this.serviceUtil.urlBuilder(endpointProperty.getBaseUrl(),
-                    endpointProperty.getPath(), lat, lon, endpointProperty.getApiKey())).get();
+            return this.dailyWeatherAPIClientService.getDailyWeather(endpointProperty.getPath(), lat, lon,
+                    endpointProperty.getApiKey(), endpointProperty.getWeatherUnit()).get();
         }
         catch (Exception e){
             log.error("Could not return daly weather forecast! - ", e);
