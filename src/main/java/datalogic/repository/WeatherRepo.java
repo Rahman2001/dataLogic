@@ -24,13 +24,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Repository
 public class WeatherRepo {
 
-    @Autowired
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final FlywayConfig flywayConfig;
+    private final FlywayMigrationService flywayMigrationService;
 
     @Autowired
-    private FlywayConfig flywayConfig;
-    @Autowired
-    private FlywayMigrationService flywayMigrationService;
+    public WeatherRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate, FlywayConfig flywayConfig, FlywayMigrationService flywayMigrationService){
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.flywayConfig = flywayConfig;
+        this.flywayMigrationService = flywayMigrationService;
+    }
 
     public Boolean createHourlyWeather(@NotNull HourlyWeather hourlyWeather) {
         String query = "CREATE TABLE HourlyWeather_of_" + hourlyWeather.getCity() +

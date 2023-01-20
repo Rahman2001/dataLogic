@@ -12,5 +12,6 @@ public class EndpointProperty {
     private String baseUrl;
     private String path;
     private String apiKey;
+    private String weatherUnit;
 
 }

@@ -1,8 +1,6 @@
 package datalogic.config;
 
-import datalogic.service.GeocodingAPIClientService;
-import datalogic.service.IPGeolocationAPIClientService;
-import datalogic.service.WeatherAPIClientService;
+import datalogic.service.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +32,8 @@ public class RestServiceForRetrofit {
     private final Long RETROFIT_LONG_RUNNING_READ_TIMEOUT;
     private final File RETROFIT_CACHE_DIRECTORY;
     private final Long RETROFIT_DEFAULT_READ_TIMEOUT;
+    private OkHttpClient okHttpClient;
+    private final Map<String, EndpointProperty> endpointPropertyMap;
 
     @Autowired
     public RestServiceForRetrofit(@Qualifier("restEndpoints") final List<EndpointProperty> restEndpoints,
@@ -46,41 +46,53 @@ public class RestServiceForRetrofit {
         this.RETROFIT_LONG_RUNNING_READ_TIMEOUT = RETROFIT_LONG_READING_TIMEOUT;
         this.RETROFIT_DEFAULT_READ_TIMEOUT = 200L;
 
-        Map<String, EndpointProperty> serviceNameMap = createEndpointsMap(restEndpoints);
-        this.retrofit = defaultSetup(serviceNameMap.get("Geocoding_API"));
+        this.endpointPropertyMap = createEndpointsMap(restEndpoints);
+        this.okHttpClient = defaultSetup();
+        this.retrofit = new Retrofit.Builder().client(this.okHttpClient).build();
     }
 
-    private Retrofit defaultSetup(EndpointProperty endpointProperty) {
-        log.info("Rest service for Retrofit is being initialized with default read timeout: " +
-                endpointProperty.getServiceName() + " " + endpointProperty.getBaseUrl() + " " + this.RETROFIT_DEFAULT_READ_TIMEOUT);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+    private OkHttpClient defaultSetup() {
+        return new OkHttpClient.Builder()
                 .readTimeout(RETROFIT_DEFAULT_READ_TIMEOUT, TimeUnit.SECONDS)
                 .connectTimeout(60L, TimeUnit.SECONDS)
                 .addInterceptor(new RequestLoggerInterceptor())
                 .addInterceptor(new CorrelationIdHeaderInterceptor())
                 .build();
-
-        return new Retrofit.Builder()
-                .baseUrl(endpointProperty.getBaseUrl())
-                .addConverterFactory(JacksonConverterFactory.create())
-                .client(okHttpClient)
-                .build();
     }
-
-    @Bean
-    public GeocodingAPIClientService geocodingAPIClientService() {
-        return this.retrofit.create(GeocodingAPIClientService.class);
-    }
-
-    @Bean
-    public IPGeolocationAPIClientService ipGeolocationAPIClientService() {
-        return this.retrofit.create(IPGeolocationAPIClientService.class);
-    }
-
     @Bean
     public WeatherAPIClientService weatherAPIClientService() {
+        this.retrofit.newBuilder().client(this.okHttpClient)
+                .baseUrl(this.endpointPropertyMap.get("OpenWeatherMap_currentWeather_API").getBaseUrl())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
         return this.retrofit.create(WeatherAPIClientService.class);
+    }
+
+    @Bean
+    public IP_APIClientService ip_apiClientService(){
+        this.retrofit.newBuilder().client(this.okHttpClient)
+                .baseUrl(this.endpointPropertyMap.get("IP_API").getBaseUrl())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        return this.retrofit.create(IP_APIClientService.class);
+    }
+
+    @Bean
+    public DailyWeatherAPIClientService dailyWeatherAPIClientService(){
+        this.retrofit.newBuilder().client(this.okHttpClient)
+                .baseUrl(this.endpointPropertyMap.get("OpenWeatherMap_dailyWeather_API").getBaseUrl())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        return this.retrofit.create(DailyWeatherAPIClientService.class);
+    }
+
+    @Bean
+    public HourlyWeatherAPIClientService hourlyWeatherAPIClientService(){
+        this.retrofit.newBuilder().client(this.okHttpClient)
+                .baseUrl(this.endpointPropertyMap.get("OpenWeatherMap_hourlyWeather_API").getBaseUrl())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        return this.retrofit.create(HourlyWeatherAPIClientService.class);
     }
 
     private Map<String, EndpointProperty> createEndpointsMap(List<EndpointProperty> endpointProperties) {

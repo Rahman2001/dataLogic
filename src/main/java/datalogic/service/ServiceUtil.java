@@ -17,4 +17,10 @@ public class ServiceUtil {
     protected String urlBuilder(String baseUrl, String path, String cityName, String apiKey){
         return baseUrl + path + "?q=" + cityName + "&appid=" + apiKey;
     }
+    protected String urlBuilder(String baseUrl, String path){
+        return baseUrl + path;
+    }
+    protected String urlBuilder(String baseUrl, String path, Double lat, Double lon, String apiKey){
+        return baseUrl + path + "?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
+    }
 }

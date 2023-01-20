@@ -2,37 +2,37 @@ package datalogic.service;
 
 import datalogic.config.EndpointProperty;
 import datalogic.model.Weather;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-@Component
+@Service
+@Slf4j
 public class WeatherAPIClientServiceImpl{
 
     private final WeatherAPIClientService weatherAPIClientService;
     private final Map<String, EndpointProperty> endpointPropertyMap;
 
     @Autowired
-    public WeatherAPIClientServiceImpl(WeatherAPIClientService weatherRestAPI, List<EndpointProperty> restEndpoints, ServiceUtil serviceUtil) {
+    public WeatherAPIClientServiceImpl(final WeatherAPIClientService weatherRestAPI,
+                                       final @Qualifier("restEndpoints") List<EndpointProperty> restEndpoints,
+                                       final ServiceUtil serviceUtil) {
         this.weatherAPIClientService = weatherRestAPI;
         this.endpointPropertyMap = serviceUtil.groupsEndpoints(restEndpoints);
     }
 
-    public Weather getCurrentWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {
+    public Weather getCurrentWeatherData(Double latitude, Double longitude) {
         EndpointProperty endpoint = this.endpointPropertyMap.get("OpenWeatherMap_currentWeather_API");
-        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getApiKey()).get();
-    }
-
-    public Weather getHourlyWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {
-        EndpointProperty endpoint = this.endpointPropertyMap.get("OpenWeatherMap_hourlyWeather_API");
-        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getApiKey()).get();
-    }
-
-    public Weather getDailyWeatherData(Double latitude, Double longitude) throws ExecutionException, InterruptedException {
-        EndpointProperty endpoint = this.endpointPropertyMap.get("OpenWeatherMap_dailyWeather_API");
-        return this.weatherAPIClientService.getWeatherData(endpoint.getBaseUrl(), latitude, longitude, endpoint.getApiKey()).get();
+        try {
+            return this.weatherAPIClientService.getWeatherData(endpoint.getPath(), latitude, longitude,
+                    endpoint.getApiKey(), endpoint.getWeatherUnit()).get();
+        } catch (Exception e) {
+            log.error("Could not return current weather data! - ", e);
+            return null;
+        }
     }
 }
