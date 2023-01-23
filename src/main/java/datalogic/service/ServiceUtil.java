@@ -11,7 +11,7 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 @Service
 public class ServiceUtil {
-    protected Map<String, EndpointProperty> groupsEndpoints(List<EndpointProperty> endpointProperties) {
+    public Map<String, EndpointProperty> groupsEndpoints(List<EndpointProperty> endpointProperties) {
         return endpointProperties.stream().collect(toImmutableMap(EndpointProperty::getServiceName, Function.identity()));
     }
     protected String urlBuilder(String baseUrl, String path, String cityName, String apiKey){

@@ -1,4 +1,4 @@
-package serviceTests;
+package serviceImplTests;
 
 public class WeatherAPIClientServiceTest {
 }

@@ -10,7 +10,7 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.util.StopWatch;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Objects;
 
 @Slf4j
@@ -47,7 +47,8 @@ public class RequestLoggerInterceptor implements Interceptor {
         }
         clock.stop();
         stringBuilder.append("\nTime: ").append(clock.getLastTaskTimeMillis()).append("ms")
-                .append("\nResponse code: ").append(response.code());
+                .append("\nResponse code: ").append(response.code()).append("\nResponse Body: ")
+                .append(response.body() != null ? "Body is not null" : "******");
 
         if(response.isSuccessful()){
             log.info(loggerMarker, stringBuilder.toString());
@@ -61,7 +62,10 @@ public class RequestLoggerInterceptor implements Interceptor {
         try {
             Request copy = request.newBuilder().build();
             Buffer buffer = new Buffer();
-            Objects.requireNonNull(copy.body()).writeTo(buffer);
+            if(copy.body() == null) {
+                return null;
+            }
+            copy.body().writeTo(buffer);
             return buffer.readUtf8();
         }
         catch (IOException ignored) {

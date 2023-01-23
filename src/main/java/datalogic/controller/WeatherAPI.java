@@ -5,11 +5,14 @@ import datalogic.model.Weather;
 import datalogic.service.IP_APIClientServiceImpl;
 import datalogic.service.WeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 @RestController
@@ -32,4 +35,10 @@ public class WeatherAPI { //returns current, hourly and daily weather data
         return current.isEmpty() ? null : current.get();
     }
 
+    @Bean
+    @Primary
+    @PostConstruct
+    public UserLocation userLocation(){
+        return this.userLocation;
+    }
 }

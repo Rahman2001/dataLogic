@@ -22,7 +22,7 @@ retrofit:
   integration:
     cacheSizeInMb: 50
     cacheDirectory: "retrofit/cache"
-    longRunningReadTimeout: 300
+    longRunningReadTimeout: 1000
   endpoints:
     - serviceName: OpenWeatherMap_currentWeather_API
       baseUrl: https://api.openweathermap.org/data/2.5/

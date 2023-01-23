@@ -1,4 +1,4 @@
-package serviceTests;
+package serviceImplTests;
 
 import datalogic.config.EndpointProperty;
 import datalogic.config.RetrofitConfig;

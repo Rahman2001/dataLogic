@@ -4,6 +4,7 @@ import datalogic.model.HourlyWeather;
 import datalogic.model.UserLocation;
 import datalogic.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,20 +16,17 @@ import java.util.Optional;
 @RequestMapping("/weather/hourly")
 public class HourlyWeatherAPI { //returns hourly weather forecast
     private final HourlyWeatherAPIClientServiceImpl hourlyWeatherAPIClientService;
-    private final UserLocation userLocation;
 
     @Autowired
-    public HourlyWeatherAPI(final IP_APIClientServiceImpl ip_apiClientService,
-                            final HourlyWeatherAPIClientServiceImpl hourlyWeatherAPIClientServiceImpl){
+    public HourlyWeatherAPI(final HourlyWeatherAPIClientServiceImpl hourlyWeatherAPIClientServiceImpl){
         this.hourlyWeatherAPIClientService = hourlyWeatherAPIClientServiceImpl;
-        this.userLocation = ip_apiClientService.getUserLocation();
     }
 
     @GetMapping("/current")
     @Nullable
-    public HourlyWeather getHourlyWeatherOFCurrentLocation(){
+    public HourlyWeather getHourlyWeatherOFCurrentLocation(@Qualifier("userLocation") final UserLocation userLocation){
         Optional<HourlyWeather> hourlyWeather = Optional.ofNullable(this.hourlyWeatherAPIClientService.getHourlyWeather(
-                this.userLocation.getLat(), this.userLocation.getLon()));
+                userLocation.getLat(), userLocation.getLon()));
         return hourlyWeather.isEmpty() ? null : hourlyWeather.get();
     }
 }

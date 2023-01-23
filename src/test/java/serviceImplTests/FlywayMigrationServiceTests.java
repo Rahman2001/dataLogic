@@ -1,4 +1,4 @@
-package serviceTests;
+package serviceImplTests;
 
 import datalogic.DataLogicApplication;
 import datalogic.service.FlywayMigrationService;

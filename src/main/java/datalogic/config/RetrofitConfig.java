@@ -17,8 +17,7 @@ public class RetrofitConfig {
 
     @Autowired
     public RetrofitConfig(RetrofitProperties retrofitProperties) {
-        RetrofitProperties r2 = retrofitProperties;
-        this.endpointProperties = r2.getEndpoints();
+        this.endpointProperties = retrofitProperties.getEndpoints();
     }
 
     @Bean
