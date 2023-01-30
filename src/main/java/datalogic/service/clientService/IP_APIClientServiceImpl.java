@@ -1,4 +1,4 @@
-package datalogic.service;
+package datalogic.service.clientService;
 
 import datalogic.model.UserLocation;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import java.net.URL;
 public class IP_APIClientServiceImpl {
     private final IP_APIClientService ip_api_service;
     private String ipAddress;
-
 
     @Autowired
     public IP_APIClientServiceImpl(final IP_APIClientService ip_api_service){

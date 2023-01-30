@@ -1,20 +1,22 @@
 package datalogic.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import datalogic.service.deserializers.HourlyWeatherDeserializer;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder(toBuilder = true)
+@JsonDeserialize(using = HourlyWeatherDeserializer.class)
 public class HourlyWeather extends Weather{
-    private Integer forecasted_total_hours;
-    private LocalDateTime hours_between;
-    private List<Weather> hourly_weather;
-
-    public void addHourlyWeather(Weather weather) {
-        this.hourly_weather.add(weather);
-    }
+    @JsonProperty("cnt")
+    private Integer forecastedTotalHours;
+    @JsonProperty("list")
+    private List<Weather> hourlyWeatherList;
 }

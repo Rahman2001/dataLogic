@@ -2,7 +2,7 @@ package datalogic.controller;
 
 import datalogic.model.HourlyWeather;
 import datalogic.model.UserLocation;
-import datalogic.service.*;
+import datalogic.service.clientService.HourlyWeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.Nullable;

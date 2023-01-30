@@ -1,6 +1,6 @@
 package datalogic.config;
 
-import datalogic.service.*;
+import datalogic.service.clientService.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 

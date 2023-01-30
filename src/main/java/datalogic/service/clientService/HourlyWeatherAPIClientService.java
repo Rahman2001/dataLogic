@@ -1,4 +1,4 @@
-package datalogic.service;
+package datalogic.service.clientService;
 
 import datalogic.model.HourlyWeather;
 import retrofit2.http.GET;

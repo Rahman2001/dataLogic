@@ -1,27 +1,40 @@
 package datalogic.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import datalogic.service.deserializers.CurrentWeatherDeserializer;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import lombok.experimental.Tolerate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder(toBuilder = true)
+@JsonDeserialize(using = CurrentWeatherDeserializer.class)
 public class Weather {
-    private LocalDateTime date_and_time;
+    @JsonProperty("dt")
+    private String dateTime;
+    @JsonProperty("description")
     private String description;
+    @JsonProperty("temp")
     private Integer temp;
-    private Integer temp_min;
-    private Integer temp_max;
-    private Integer feels_like;
+    @JsonProperty("temp_min")
+    private Integer tempMin;
+    @JsonProperty("temp_max")
+    private Integer tempMax;
+    @JsonProperty("feels_like")
+    private Integer feelsLike;
+    @JsonProperty("pressure")
     private Integer pressure;
+    @JsonProperty("humidity")
     private Integer humidity;
+    @JsonProperty("wind")
     private Integer wind;
+    @JsonProperty("clouds")
     private Integer clouds;
+    @JsonProperty("city")
     private String city;
+    @JsonProperty("country")
     private String country;
 }

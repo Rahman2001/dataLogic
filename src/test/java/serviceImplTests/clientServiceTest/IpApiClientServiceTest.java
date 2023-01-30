@@ -3,7 +3,8 @@ package serviceImplTests.clientServiceTest;
 import datalogic.config.RestServiceForRetrofit;
 import datalogic.config.RetrofitConfig;
 import datalogic.config.RetrofitProperties;
-import datalogic.service.ServiceUtil;
+import datalogic.service.clientService.IP_APIClientService;
+import datalogic.service.clientService.ServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IpApiClientServiceTest {
 
     @Autowired
-    datalogic.service.IP_APIClientService ip_apiClientService;
+    IP_APIClientService ip_apiClientService;
 
     @BeforeEach
     public void createClient(){

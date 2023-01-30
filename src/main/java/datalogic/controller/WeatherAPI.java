@@ -2,11 +2,12 @@ package datalogic.controller;
 
 import datalogic.model.UserLocation;
 import datalogic.model.Weather;
-import datalogic.service.IP_APIClientServiceImpl;
-import datalogic.service.WeatherAPIClientServiceImpl;
+import datalogic.service.clientService.IP_APIClientServiceImpl;
+import datalogic.service.clientService.WeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,9 +31,12 @@ public class WeatherAPI { //returns current, hourly and daily weather data
 
     @GetMapping("/current")
     @Nullable
-    public Weather getCurrentWeatherOfCurrentWeather() {
+    public ResponseEntity<Weather> getCurrentWeatherOfCurrentWeather() {
         Optional<Weather> current = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(this.userLocation.getLat(), this.userLocation.getLon()));
-        return current.isEmpty() ? null : current.get();
+        current.ifPresent(weather -> {weather.setCity(this.userLocation.getCity());
+                weather.setCountry(this.userLocation.getCountry());});
+        return current.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(current.get());
+
     }
 
     @Bean

@@ -2,7 +2,7 @@ package datalogic.controller;
 
 import datalogic.model.DailyWeather;
 import datalogic.model.UserLocation;
-import datalogic.service.DailyWeatherAPIClientServiceImpl;
+import datalogic.service.clientService.DailyWeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.Nullable;

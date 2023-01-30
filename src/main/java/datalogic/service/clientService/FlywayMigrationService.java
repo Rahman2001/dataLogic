@@ -1,4 +1,4 @@
-package datalogic.service;
+package datalogic.service.clientService;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;

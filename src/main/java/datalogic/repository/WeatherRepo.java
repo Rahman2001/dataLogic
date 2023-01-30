@@ -5,7 +5,7 @@ import datalogic.config.FlywayConfig;
 import datalogic.model.DailyWeather;
 import datalogic.model.HourlyWeather;
 import datalogic.model.Weather;
-import datalogic.service.FlywayMigrationService;
+import datalogic.service.clientService.FlywayMigrationService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -93,7 +93,7 @@ public class WeatherRepo {
                 " (date_and_time, temp, temp_min, temp_max, pressure, humidity, wind, feels_like, clouds) " +
                 "VALUES (:date_and_time, :temp, :temp_min, :temp_max, :pressure, :humidity, :wind, :feels_like, :clouds)";
 
-        List<Map>  mapList = hourlyWeather.getHourly_weather().stream()
+        List<Map>  mapList = hourlyWeather.getHourlyWeatherList().stream()
                 .map(weather -> new ObjectMapper().convertValue(weather, Map.class)).toList();
         boolean[] isInsertedAndCreated = new boolean[2];
         isInsertedAndCreated[0] = this.isInserted(query, mapList);
@@ -107,7 +107,7 @@ public class WeatherRepo {
                 " (date_and_time, temp, temp_min, temp_max, pressure, humidity, wind, feels_like, clouds) " +
                 "VALUES (:date_and_time, :temp, :temp_min, :temp_max, :pressure, :humidity, :wind, :feels_like, :clouds)";
 
-        List<Map>  mapList = dailyWeather.getDaily_weather().stream()
+        List<Map>  mapList = dailyWeather.getDailyWeatherList().stream()
                 .map(weather -> new ObjectMapper().convertValue(weather, Map.class)).toList();
         boolean[] isInsertedAndModified = new boolean[2];
         isInsertedAndModified[0] = this.isInserted(query, mapList);
