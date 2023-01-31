@@ -1,4 +1,4 @@
-package datalogic.service.clientService;
+package datalogic.service.serviceImpl;
 
 import datalogic.config.EndpointProperty;
 import org.springframework.stereotype.Service;

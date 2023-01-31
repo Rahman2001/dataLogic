@@ -1,7 +1,8 @@
-package datalogic.service.clientService;
+package datalogic.service.serviceImpl;
 
 import datalogic.config.EndpointProperty;
 import datalogic.model.HourlyWeather;
+import datalogic.service.clientService.HourlyWeatherAPIClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,6 @@ import java.util.Map;
 public class HourlyWeatherAPIClientServiceImpl {
     private final HourlyWeatherAPIClientService hourlyWeatherAPIClientService;
     private final Map<String, EndpointProperty> endpointPropertyMap;
-    //private final ServiceUtil serviceUtil;
 
     @Autowired
     public HourlyWeatherAPIClientServiceImpl(final @Qualifier("restEndpoints")List<EndpointProperty> restEndpoints,
@@ -23,7 +23,6 @@ public class HourlyWeatherAPIClientServiceImpl {
                                              final ServiceUtil serviceUtil){
         this.hourlyWeatherAPIClientService = hourlyWeatherAPIClientService;
         this.endpointPropertyMap = serviceUtil.groupsEndpoints(restEndpoints);
-        //this.serviceUtil = serviceUtil;
     }
 
     public HourlyWeather getHourlyWeather(Double lat, Double lon) {

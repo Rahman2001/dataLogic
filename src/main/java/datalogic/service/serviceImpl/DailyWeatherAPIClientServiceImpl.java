@@ -1,7 +1,8 @@
-package datalogic.service.clientService;
+package datalogic.service.serviceImpl;
 
 import datalogic.config.EndpointProperty;
 import datalogic.model.DailyWeather;
+import datalogic.service.clientService.DailyWeatherAPIClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

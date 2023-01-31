@@ -1,10 +1,10 @@
-package serviceImplTests;
+package serviceTests.serviceImplTests;
 
 import datalogic.config.EndpointProperty;
 import datalogic.model.DailyWeather;
 import datalogic.service.clientService.DailyWeatherAPIClientService;
-import datalogic.service.clientService.DailyWeatherAPIClientServiceImpl;
-import datalogic.service.clientService.ServiceUtil;
+import datalogic.service.serviceImpl.DailyWeatherAPIClientServiceImpl;
+import datalogic.service.serviceImpl.ServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,21 +30,20 @@ ServiceUtil.groupByEndpoints() passes mocked data to Map that is used by Endpoin
 @ContextConfiguration(classes = {ServiceUtil.class})
 public class DailyWeatherAPIServiceImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    DailyWeatherAPIClientService dailyWeatherAPIClientService;
+    private DailyWeatherAPIClientService dailyWeatherAPIClientService;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    ServiceUtil serviceUtil;
-    EndpointProperty endpointProperty;
-    Map<String, EndpointProperty> endpointPropertyMap;
+    private ServiceUtil serviceUtil;
+    private Map<String, EndpointProperty> endpointPropertyMap;
 
     @InjectMocks
     DailyWeatherAPIClientServiceImpl dailyWeatherAPIClientServiceImpl;
 
     @BeforeEach
     public void creatStubbing(){
-        this.endpointProperty = EndpointProperty.builder().apiKey("Rahman").weatherUnit("metric")
+        EndpointProperty endpointProperty = EndpointProperty.builder().apiKey("Rahman").weatherUnit("metric")
                 .path("adsadsa").build();
         this.endpointPropertyMap = new HashMap<>();
-        this.endpointPropertyMap.put("rahman", this.endpointProperty);
+        this.endpointPropertyMap.put("rahman", endpointProperty);
     }
 
     @Test

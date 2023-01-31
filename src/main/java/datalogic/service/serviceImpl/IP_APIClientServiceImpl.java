@@ -1,6 +1,7 @@
-package datalogic.service.clientService;
+package datalogic.service.serviceImpl;
 
 import datalogic.model.UserLocation;
+import datalogic.service.clientService.IP_APIClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

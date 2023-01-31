@@ -2,14 +2,15 @@ package datalogic.controller;
 
 import datalogic.model.UserLocation;
 import datalogic.model.Weather;
-import datalogic.service.clientService.IP_APIClientServiceImpl;
-import datalogic.service.clientService.WeatherAPIClientServiceImpl;
+import datalogic.service.serviceImpl.IP_APIClientServiceImpl;
+import datalogic.service.serviceImpl.WeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/weather")
-public class WeatherAPI { //returns current, hourly and daily weather data
+public class WeatherAPI { //returns current weather data
     private final WeatherAPIClientServiceImpl weatherAPIClientService;
     private final UserLocation userLocation;
 
@@ -29,7 +30,7 @@ public class WeatherAPI { //returns current, hourly and daily weather data
         this.userLocation = ip_apiClientService.getUserLocation();
     }
 
-    @GetMapping("/current")
+    @GetMapping("/currentLocation")
     @Nullable
     public ResponseEntity<Weather> getCurrentWeatherOfCurrentWeather() {
         Optional<Weather> current = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(this.userLocation.getLat(), this.userLocation.getLon()));
@@ -37,6 +38,16 @@ public class WeatherAPI { //returns current, hourly and daily weather data
                 weather.setCountry(this.userLocation.getCountry());});
         return current.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(current.get());
 
+    }
+
+    @GetMapping("/{city}")
+    @Nullable
+    public ResponseEntity<Weather> getCurrentWeather(@PathVariable("city") String city) {
+        Optional<Weather> weatherOfCity = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(city));
+        weatherOfCity.ifPresent(weather -> {
+            weather.setCity(city);
+        });
+        return weatherOfCity.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(weatherOfCity.get());
     }
 
     @Bean

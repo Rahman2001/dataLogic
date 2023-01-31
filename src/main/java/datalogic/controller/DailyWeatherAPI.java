@@ -2,7 +2,7 @@ package datalogic.controller;
 
 import datalogic.model.DailyWeather;
 import datalogic.model.UserLocation;
-import datalogic.service.clientService.DailyWeatherAPIClientServiceImpl;
+import datalogic.service.serviceImpl.DailyWeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.Nullable;
@@ -22,7 +22,7 @@ public class DailyWeatherAPI { //returns daily weather forecast
         this.dailyWeatherAPIClientService = dailyWeatherAPIClientService;
     }
 
-    @GetMapping("/current")
+    @GetMapping("/currentLocation")
     @Nullable
     public DailyWeather getDailyWeatherOfCurrentLocation(@Qualifier("userLocation") final UserLocation userLocation){
         Optional<DailyWeather> dailyWeather = Optional.ofNullable(this.dailyWeatherAPIClientService.getDailyWeather(

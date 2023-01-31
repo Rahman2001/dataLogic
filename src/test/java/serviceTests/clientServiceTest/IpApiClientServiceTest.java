@@ -1,10 +1,10 @@
-package serviceImplTests.clientServiceTest;
+package serviceTests.clientServiceTest;
 
 import datalogic.config.RestServiceForRetrofit;
 import datalogic.config.RetrofitConfig;
 import datalogic.config.RetrofitProperties;
 import datalogic.service.clientService.IP_APIClientService;
-import datalogic.service.clientService.ServiceUtil;
+import datalogic.service.serviceImpl.ServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

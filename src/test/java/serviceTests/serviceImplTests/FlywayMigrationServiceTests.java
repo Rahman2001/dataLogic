@@ -1,7 +1,7 @@
-package serviceImplTests;
+package serviceTests.serviceImplTests;
 
 import datalogic.DataLogicApplication;
-import datalogic.service.clientService.FlywayMigrationService;
+import datalogic.service.FlywayMigrationService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;

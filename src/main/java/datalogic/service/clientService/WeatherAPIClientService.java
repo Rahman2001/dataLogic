@@ -14,5 +14,10 @@ public interface WeatherAPIClientService { //this client service requests weathe
                                               @Query(value = "lon") Double longitude,
                                               @Query(value = "appid") String API_key,
                                               @Query(value = "units") String weatherUnit);
+    @GET("{path}")
+    CompletableFuture<Weather> getWeatherData(@Path("path") String path,
+                                              @Query("q") String city,
+                                              @Query("appid") String API_key,
+                                              @Query("units") String weatherUnit);
 
 }

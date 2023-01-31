@@ -5,7 +5,7 @@ import datalogic.config.FlywayConfig;
 import datalogic.model.DailyWeather;
 import datalogic.model.HourlyWeather;
 import datalogic.model.Weather;
-import datalogic.service.clientService.FlywayMigrationService;
+import datalogic.service.FlywayMigrationService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;

@@ -1,9 +1,9 @@
-package serviceImplTests;
+package serviceTests.serviceImplTests;
 
 import datalogic.config.EndpointProperty;
 import datalogic.config.RetrofitConfig;
 import datalogic.config.RetrofitProperties;
-import datalogic.service.clientService.ServiceUtil;
+import datalogic.service.serviceImpl.ServiceUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

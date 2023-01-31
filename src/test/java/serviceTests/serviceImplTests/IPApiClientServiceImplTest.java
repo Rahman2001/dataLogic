@@ -1,8 +1,8 @@
-package serviceImplTests;
+package serviceTests.serviceImplTests;
 
 import datalogic.model.UserLocation;
 import datalogic.service.clientService.IP_APIClientService;
-import datalogic.service.clientService.IP_APIClientServiceImpl;
+import datalogic.service.serviceImpl.IP_APIClientServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
