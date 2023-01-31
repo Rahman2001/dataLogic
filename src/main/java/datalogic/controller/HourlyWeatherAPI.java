@@ -5,8 +5,9 @@ import datalogic.model.UserLocation;
 import datalogic.service.serviceImpl.HourlyWeatherAPIClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.lang.Nullable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,10 +24,16 @@ public class HourlyWeatherAPI { //returns hourly weather forecast
     }
 
     @GetMapping("/currentLocation")
-    @Nullable
-    public HourlyWeather getHourlyWeatherOFCurrentLocation(@Qualifier("userLocation") final UserLocation userLocation){
+    public ResponseEntity<HourlyWeather> getHourlyWeatherOfCurrentLocation(@Qualifier("userLocation") final UserLocation userLocation){
         Optional<HourlyWeather> hourlyWeather = Optional.ofNullable(this.hourlyWeatherAPIClientService.getHourlyWeather(
                 userLocation.getLat(), userLocation.getLon()));
-        return hourlyWeather.isEmpty() ? null : hourlyWeather.get();
+        return hourlyWeather.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(hourlyWeather.get());
+    }
+
+    @GetMapping("/{city}")
+    public ResponseEntity<HourlyWeather> getHourlyWeather(@PathVariable("city") String city) {
+        Optional<HourlyWeather> hourlyWeather = Optional.ofNullable(this.hourlyWeatherAPIClientService.getHourlyWeather(city));
+        hourlyWeather.ifPresent(weather -> weather.setCity(city));
+        return hourlyWeather.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(hourlyWeather.get());
     }
 }

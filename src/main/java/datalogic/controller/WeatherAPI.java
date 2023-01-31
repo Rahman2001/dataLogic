@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +30,6 @@ public class WeatherAPI { //returns current weather data
     }
 
     @GetMapping("/currentLocation")
-    @Nullable
     public ResponseEntity<Weather> getCurrentWeatherOfCurrentWeather() {
         Optional<Weather> current = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(this.userLocation.getLat(), this.userLocation.getLon()));
         current.ifPresent(weather -> {weather.setCity(this.userLocation.getCity());
@@ -41,12 +39,9 @@ public class WeatherAPI { //returns current weather data
     }
 
     @GetMapping("/{city}")
-    @Nullable
     public ResponseEntity<Weather> getCurrentWeather(@PathVariable("city") String city) {
         Optional<Weather> weatherOfCity = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(city));
-        weatherOfCity.ifPresent(weather -> {
-            weather.setCity(city);
-        });
+        weatherOfCity.ifPresent(weather -> weather.setCity(city));
         return weatherOfCity.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(weatherOfCity.get());
     }
 

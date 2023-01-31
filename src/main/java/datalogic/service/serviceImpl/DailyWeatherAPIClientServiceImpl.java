@@ -9,29 +9,37 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
 public class DailyWeatherAPIClientServiceImpl {
     private final DailyWeatherAPIClientService dailyWeatherAPIClientService;
-    private final Map<String, EndpointProperty> endpointPropertyMap;
+    private final EndpointProperty endpoint;
 
     @Autowired
     public DailyWeatherAPIClientServiceImpl(final DailyWeatherAPIClientService dailyWeatherAPIClientService,
                                             final @Qualifier("restEndpoints") List<EndpointProperty> restEndpoints,
                                             ServiceUtil serviceUtil){
         this.dailyWeatherAPIClientService = dailyWeatherAPIClientService;
-        this.endpointPropertyMap = serviceUtil.groupsEndpoints(restEndpoints);
+        this.endpoint = serviceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_dailyWeather_API");
     }
 
     public DailyWeather getDailyWeather(Double lat, Double lon){
-        EndpointProperty endpointProperty = this.endpointPropertyMap.get("OpenWeatherMap_dailyWeather_API");
         try {
-            return this.dailyWeatherAPIClientService.getDailyWeather(endpointProperty.getPath(), lat, lon,
-                    endpointProperty.getApiKey(), endpointProperty.getWeatherUnit()).join();
+            return this.dailyWeatherAPIClientService.getDailyWeather(endpoint.getPath(), lat, lon,
+                    endpoint.getApiKey(), endpoint.getWeatherUnit()).join();
         }
         catch (Exception e){
+            log.error("Could not return daly weather forecast! - ", e);
+            return null;
+        }
+    }
+    public DailyWeather getDailyWeather(String city) {
+        try {
+            return this.dailyWeatherAPIClientService.getDailyWeather(endpoint.getPath(), city, endpoint.getApiKey(),
+                    endpoint.getWeatherUnit()).join();
+        }
+        catch (Exception e) {
             log.error("Could not return daly weather forecast! - ", e);
             return null;
         }

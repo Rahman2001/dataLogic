@@ -9,29 +9,38 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
 public class HourlyWeatherAPIClientServiceImpl {
     private final HourlyWeatherAPIClientService hourlyWeatherAPIClientService;
-    private final Map<String, EndpointProperty> endpointPropertyMap;
+    private final EndpointProperty endpoint;
 
     @Autowired
     public HourlyWeatherAPIClientServiceImpl(final @Qualifier("restEndpoints")List<EndpointProperty> restEndpoints,
                                              final HourlyWeatherAPIClientService hourlyWeatherAPIClientService,
                                              final ServiceUtil serviceUtil){
         this.hourlyWeatherAPIClientService = hourlyWeatherAPIClientService;
-        this.endpointPropertyMap = serviceUtil.groupsEndpoints(restEndpoints);
+        this.endpoint = serviceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_hourlyWeather_API");
     }
 
     public HourlyWeather getHourlyWeather(Double lat, Double lon) {
-        EndpointProperty endpointProperty = this.endpointPropertyMap.get("OpenWeatherMap_hourlyWeather_API");
         try{
-            return this.hourlyWeatherAPIClientService.getHourlyWeather(endpointProperty.getPath(), lat, lon,
-                    endpointProperty.getApiKey(), endpointProperty.getWeatherUnit()).get();
+            return this.hourlyWeatherAPIClientService.getHourlyWeather(endpoint.getPath(), lat, lon,
+                    endpoint.getApiKey(), endpoint.getWeatherUnit()).get();
         }
         catch (Exception e){
+            log.error("Could not return hourly weather forecast! - ", e);
+            return null;
+        }
+    }
+
+    public HourlyWeather getHourlyWeather(String city) {
+        try {
+            return this.hourlyWeatherAPIClientService.getHourlyWeather(endpoint.getPath(), city, endpoint.getApiKey(),
+                    endpoint.getWeatherUnit()).join();
+        }
+        catch (Exception e) {
             log.error("Could not return hourly weather forecast! - ", e);
             return null;
         }
