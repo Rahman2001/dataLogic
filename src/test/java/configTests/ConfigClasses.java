@@ -1,4 +1,4 @@
-package ConfigTests;
+package configTests;
 
 import datalogic.config.*;
 import org.junit.jupiter.api.Test;
