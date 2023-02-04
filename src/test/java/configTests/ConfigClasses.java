@@ -27,6 +27,7 @@ public class ConfigClasses {
     @Test
     public void retrofitConfig(){
         assertNotNull(retrofitConfig);
+        assertNotNull(retrofitConfig.getEndpointProperties());
     }
 
     @Test

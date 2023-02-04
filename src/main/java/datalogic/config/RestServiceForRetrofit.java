@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
-
 @Slf4j
 @Component
 @Configuration
@@ -69,15 +67,6 @@ public class RestServiceForRetrofit {
                 .addConverterFactory(this.jacksonConverterFactory)
                 .build();
         return retrofit.create(WeatherAPIClientService.class);
-    }
-
-    @Bean
-    public IP_APIClientService ip_apiClientService(){
-        Retrofit retrofit = new Retrofit.Builder().client(this.okHttpClient)
-                .baseUrl(this.endpointPropertyMap.get("IP_API").getBaseUrl())
-                .addConverterFactory(this.jacksonConverterFactory)
-                .build();
-        return retrofit.create(IP_APIClientService.class);
     }
 
     @Bean

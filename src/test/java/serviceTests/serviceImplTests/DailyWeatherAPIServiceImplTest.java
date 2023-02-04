@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-/* We used Answers.RETURNS_DEEP_STUBS for ServiceUtil.class because we want to mock EndpointProperty in method-under-test (.getDailyWeather(Double lat, Double lon))
+/* We used Answers.RETURNS_DEEP_STUBS for ServiceUtil.class because we want to mock EndpointProperty in method-under-test (.getDailyWeatherForCity(Double lat, Double lon))
 ServiceUtil.groupByEndpoints() passes mocked data to Map that is used by EndpointProperty at the end. Thus, we insert mocked argument into argument of method-under-test.
  */
 // For more details, documentation: https://www.javadoc.io/doc/org.mockito/mockito-core/2.2.9/org/mockito/Mockito.html#RETURNS_DEEP_STUBS

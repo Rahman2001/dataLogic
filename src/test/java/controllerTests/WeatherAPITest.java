@@ -1,9 +1,10 @@
 package controllerTests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import datalogic.controller.WeatherAPI;
 import datalogic.model.UserLocation;
 import datalogic.model.Weather;
-import datalogic.service.serviceImpl.IP_APIClientServiceImpl;
 import datalogic.service.serviceImpl.WeatherAPIClientServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,20 +32,20 @@ public class WeatherAPITest {
     private MockMvc mockMvc;
     @MockBean
     private WeatherAPIClientServiceImpl clientService;
-    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
-    private IP_APIClientServiceImpl ipService;
-    static UserLocation userLocation;
+    static String json;
 
     @BeforeAll
-    public static void createUserLocation() {
-        userLocation = UserLocation.builder().city("Ankara").country("Turkey").lat(29.222).lon(35.212).build();
+    public static void createUserLocation() throws JsonProcessingException {
+        UserLocation userLocation = UserLocation.builder().city("Ankara").country("Turkey")
+                .lat(29.222).lon(35.212).build();
+        json = new ObjectMapper().writeValueAsString(userLocation);
     }
 
     @Test
     public void weatherAPITest() throws Exception {
-        doReturn(userLocation).when(ipService).getUserLocation();
         when(clientService.getCurrentWeatherData(anyDouble(), anyDouble())).thenReturn(Weather.builder().wind(22).description("cold").build());
-        mockMvc.perform(get("/weather/currentLocation")).andExpect(status().isOk());
+        mockMvc.perform(get("/weather").contentType(MediaType.APPLICATION_JSON)
+                .content(json)).andExpect(status().isOk());
     }
 
 }

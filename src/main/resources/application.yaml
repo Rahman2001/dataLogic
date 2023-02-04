@@ -39,8 +39,6 @@ retrofit:
       path: daily
       weatherUnit: metric
       apiKey: ${OpenWeatherMap_API_key}
-    - serviceName: IP_API
-      baseUrl: http://ip-api.com/json/
 
 spring:
   jpa:

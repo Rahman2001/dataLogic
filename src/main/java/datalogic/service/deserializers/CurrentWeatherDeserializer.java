@@ -15,9 +15,12 @@ import java.util.*;
 
 @Slf4j
 public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
-
+    private List<String> jsonPropertyValues;
     public CurrentWeatherDeserializer(Class<? extends Weather> vc) {
         super(vc);
+    }
+    public CurrentWeatherDeserializer() {
+        super(Weather.class);
     }
 
     @Override
@@ -25,6 +28,9 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
         JsonNode node = p.getCodec().readTree(p);
         Class<Weather> cl = Weather.class;
         Field[] fields = cl.getDeclaredFields();
+        this.jsonPropertyValues = Arrays.stream(fields).filter(f -> f.getDeclaredAnnotation(JsonProperty.class) != null)
+                .map(f -> f.getDeclaredAnnotation(JsonProperty.class).value()).toList();
+
         Map<String, Object> jsonPropertyAnnotationValue = getJsonPropertyValuesAndTypes(fields);
         Map<String, String> fieldAndJsonPropertyMap = getClassFieldNamesAndJsonPropertyValues(fields);
         setValuesFromResponse(node, jsonPropertyAnnotationValue);
@@ -62,18 +68,20 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
     }
 
     protected Map<String, Object> getJsonPropertyValuesAndTypes(@NotNull Field[] fields){
-        List<String> jsonPropertyValues = Arrays.stream(fields).map(f -> f.getDeclaredAnnotation(JsonProperty.class).value()).toList();
-        List<String> fieldTypes = Arrays.stream(fields).map(f -> f.getType().getSimpleName()).toList();
+        List<String> fieldTypes = Arrays.stream(fields).filter(f-> f.getDeclaredAnnotation(JsonProperty.class) != null)
+                .map(f -> f.getType().getSimpleName()).toList();
         Map<String, Object> jsonPropertyValueMap = new HashMap<>();
+
         for(int i = 0; i < jsonPropertyValues.size(); i++) {
             jsonPropertyValueMap.put(jsonPropertyValues.get(i), fieldTypes.get(i));
         }
         return jsonPropertyValueMap;
     }
     protected Map<String, String> getClassFieldNamesAndJsonPropertyValues(@NotNull Field[] fields) {
-        List<String> fieldNames = Arrays.stream(fields).map(Field::getName).toList();
-        List<String> jsonPropertyValues = Arrays.stream(fields).map(f -> f.getDeclaredAnnotation(JsonProperty.class).value()).toList();
+        List<String> fieldNames = Arrays.stream(fields).filter(f-> f.getDeclaredAnnotation(JsonProperty.class) != null)
+                .map(Field::getName).toList();
         Map<String, String> fieldAndJsonPropertyMap = new HashMap<>();
+
         for(int i = 0; i < fieldNames.size(); i++) {
             fieldAndJsonPropertyMap.put(fieldNames.get(i), jsonPropertyValues.get(i));
         }
@@ -91,6 +99,7 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
     }
     private Weather getWeather(@NotNull Map<String, Object> fieldMap) {
         return Weather.builder()
+                .api_name("current_weather")
                 .city((String) fieldMap.get("city"))
                 .country((String) fieldMap.get("country"))
                 .clouds((Integer) fieldMap.get("clouds"))
