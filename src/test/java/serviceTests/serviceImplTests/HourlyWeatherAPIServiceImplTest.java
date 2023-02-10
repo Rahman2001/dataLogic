@@ -6,7 +6,7 @@ import datalogic.config.RetrofitProperties;
 import datalogic.model.HourlyWeather;
 import datalogic.service.clientService.HourlyWeatherAPIClientService;
 import datalogic.service.serviceImpl.HourlyWeatherAPIClientServiceImpl;
-import datalogic.service.serviceImpl.ServiceUtil;
+import datalogic.service.serviceImpl.ApiServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,11 +28,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {ServiceUtil.class})
+@ContextConfiguration(classes = {ApiServiceUtil.class})
 @SpringBootTest(classes = {RetrofitConfig.class, RetrofitProperties.class})
 public class HourlyWeatherAPIServiceImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ServiceUtil serviceUtil;
+    private ApiServiceUtil apiServiceUtil;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private HourlyWeatherAPIClientService client;
     @MockBean(name = "restEndpoints")
@@ -49,7 +49,7 @@ public class HourlyWeatherAPIServiceImplTest {
 
     @Test
     public void hourlyWeatherAPIServiceImplTest() throws ExecutionException, InterruptedException {
-        when(this.serviceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
+        when(this.apiServiceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
         when(this.client.getHourlyWeather(anyString(),anyDouble(), anyDouble(), anyString(), anyString()).get())
                 .thenReturn(HourlyWeather.builder().build());
         HourlyWeather hourlyWeather = serviceImpl.getHourlyWeather(22.0, 23.2);

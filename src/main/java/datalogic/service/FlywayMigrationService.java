@@ -1,124 +1,85 @@
 package datalogic.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.*;
 
 @Service
+@Slf4j
 public class FlywayMigrationService {
     @Value("${spring.flyway.location}")
     private String DB_MIGRATION_DIRECTORY;
+    private final Map<String, String> fileNamesOfTables;
 
-    //creates a table with either HourlyWeather name or DailyWeather name and after, creates .sql file in 'db.migration' directory.
-    public Boolean createTableWithWeatherAndCityName(@NotNull String sqlScript) {
-        String tableName = sqlScript.replaceAll("\\s*CREATE\\s+TABLE\\s+", "").split("\\s+")[0];
-        String tableVersion = this.getTableVersionBYTableName(tableName);
-
-        tableVersion = tableVersion + this.increaseSecondDigitOfVersion(tableVersion, tableName) +
-                this.increaseThirdDigitOfVersion(tableVersion, tableName) + "__";
-
-        File file = new File(this.DB_MIGRATION_DIRECTORY, tableVersion + tableName + ".sql");
-
-        try {
-            return file.createNewFile();
-        } catch (IOException io) {
-            io.printStackTrace();
-            return false;
-        }
+    public FlywayMigrationService() {
+        this.fileNamesOfTables = this.getFileNamesOfTables();
     }
 
-    //alters or deletes a table of either HourlyWeather or DailyWeather and after, makes changes to appropriate files in 'db.migration' directory.
-    public Boolean alterOrDropTable(@NotNull String sqlScript) {
-        String tableName = sqlScript.replaceAll("\\s*\\S+\\s+TABLE\\s+", "").split("\\s+")[0];
-        String tableVersion = this.getTableVersionBYTableName(tableName);
-
-        tableVersion = tableVersion + this.increaseSecondDigitOfVersion(tableVersion, tableName) + "_" +
-                0 + "__";
-
-        try {
-            File fileToCreate = new File(this.DB_MIGRATION_DIRECTORY, tableVersion + tableName + ".sql");
-            boolean[] isCreatedAndModified = new boolean[2];
-            isCreatedAndModified[0] = fileToCreate.createNewFile();
-            BufferedWriter bf = new BufferedWriter(new FileWriter(fileToCreate));
-            bf.write(sqlScript);
-            isCreatedAndModified[1] = fileToCreate.setLastModified(LocalDateTime.now().getMinute());
-
-            return isCreatedAndModified[0] && isCreatedAndModified[1];
-
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-            return false;
-        }
-    }
-
-    public Boolean insertDataIntoFile(@NotNull String sqlScript) {
+    //modifies a file (.sql) of appropriate table by inserting "insert" sql script.
+    public Boolean insertedInto(@NotNull String sqlScript) {
         String tableName = sqlScript.replaceAll("\\s*INSERT\\s+INTO\\s+", "").split("\\s+")[0];
-        String tableVersion = this.getTableVersionBYTableName(tableName);
-
-        Long thirdDigitOfVersion = this.increaseThirdDigitOfVersion(tableVersion, tableName);
-        Long secondDigitOfVersion = this.findTheGreatestInSecondDigitOfVersion(new String[]{tableName}, tableVersion);
+        String fileName = this.fileNamesOfTables.get(tableName);
+        return this.fileIsModified(fileName, sqlScript);
+    }
+    public Boolean updatedTable(@NotNull String sqlScript) {
+        String tableName = sqlScript.replaceAll("\\s*UPDATE\\s+", "").split("\\s+")[0];
+        String fileName = this.fileNamesOfTables.get(tableName);
+        return fileIsModified(fileName, sqlScript);
+    }
+    //writes SQL scripts into indicated file (fileName) and if it is successful, returns true.
+    private Boolean fileIsModified(String fileName, String sqlScript) {
         boolean isModified = false;
-
-        File fileToModify = new File(this.DB_MIGRATION_DIRECTORY, tableVersion + secondDigitOfVersion + thirdDigitOfVersion + tableName + ".sql");
+        File fileToModify = new File(this.DB_MIGRATION_DIRECTORY, fileName + ".sql");
         try(BufferedWriter bf = new BufferedWriter(new FileWriter(fileToModify))) {
             bf.newLine();
             bf.write(sqlScript);
             isModified = fileToModify.setLastModified(LocalDateTime.now().getMinute());
+            log.info("Successfully modified a file for flyway migration : " + fileToModify.getName());
         } catch (IOException io) {
-            io.printStackTrace();
+            log.error("Could not modify a file for flyway migration : " + fileToModify.getName());
         }
-
         return isModified;
     }
-
-    private String getTableVersionBYTableName(String tableName) {
-        String tableType = tableName.replaceAll("_\\S+_\\S+", ""); //replaces parts of string which given regex. (ex.: "HourlyWeather_of_Ankara" -> "HourlyWeather")
-        return tableType.equalsIgnoreCase("HourlyWeather") ? "V3_" : "V4_";
+    private List<String> getFileNames(String tableName, String tableVersion) {
+        File[] files = new File(this.DB_MIGRATION_DIRECTORY).listFiles();
+        return files != null ? Arrays.stream(files).map(File::getName)
+                .filter(name -> name.matches(tableVersion + "\\d+_\\d+__" + tableName)).toList() : new ArrayList<>();
     }
 
-    // find the greatest value of version in a second digit and increases that digit for creation of new version. (ex.: V3_0_2 -> V3_1_0)
-    private Long findTheGreatestInSecondDigitOfVersion(String[] fileNames, String tableVersion) {
+    //creates a map where tables' names and corresponding file names are stored.
+    private Map<String, String> getFileNamesOfTables() {
+        Map<String, String> nameVersionMap = new HashMap<>();
+        nameVersionMap.put("locations", "V1_");
+        nameVersionMap.put("current_weather", "V2_");
+        nameVersionMap.put("hourly_weather", "V3_");
+        nameVersionMap.put("daily_weather", "V4_");
+        nameVersionMap.forEach((tableName, tableVersion) -> {
+            String[] filesNames = this.getFileNames(tableName, tableVersion).toArray(String[]::new);
+            Long greatestSecondDigit = this.getGreatestSecondDigitInVersion(filesNames, tableVersion);
+            Long greatestThirdDigit = this.getGreatestThirdDigitInVersion(filesNames, tableVersion);
+            String fileName = new StringBuilder().append(tableVersion).append(greatestSecondDigit)
+                    .append("_").append(greatestThirdDigit).append("__").append(tableName).toString();
+            nameVersionMap.replace(tableName, tableVersion, fileName);
+        });
+        return nameVersionMap;
+    }
+
+    // find the greatest value of version in a second digit (ex.: (V3_0_2, V3_1_3) -> 1)
+    private Long getGreatestSecondDigitInVersion(String[] fileNames, String tableVersion) {
         fileNames = Arrays.stream(fileNames).sorted().toArray(String[]::new);
         String secondDigit = fileNames[fileNames.length-1].replaceAll(tableVersion + "_", "").split("_")[0];
-        Long secondDigitInLong = Long.valueOf(secondDigit);
-        secondDigitInLong++;
-        return secondDigitInLong;
+        return Long.valueOf(secondDigit);
     }
 
-    // find the greatest value of version in third digit and increases that digit for creation of new version. (ex.: V3_0_2 -> V3_0_3)
-    private Long findTheGreatestInThirdDigitOfVersion(String[] fileNames, String tableVersion) {
+    // find the greatest value of version in third digit (ex.: (V3_0_2, V3_0_1) -> 2)
+    private Long getGreatestThirdDigitInVersion(String[] fileNames, String tableVersion) {
         fileNames = Arrays.stream(fileNames).sorted().toArray(String[]::new);
         String thirdDigit = fileNames[fileNames.length-1].replaceAll(tableVersion + "_\\d+_", "").split("__")[0];
-        Long thirdDigitInLong = Long.valueOf(thirdDigit);
-        thirdDigitInLong++;
-        return thirdDigitInLong;
-    }
-
-    // used when an existing table's structure or name is being modified where the second digit of version of a table has to be upgraded.
-    private Long increaseSecondDigitOfVersion(String tableVersion, String tableName) {
-        File files = new File(this.DB_MIGRATION_DIRECTORY);
-        String[] fileNames = files.list((fileIn, fileName) -> fileName.matches(tableVersion +
-                "_\\d+_\\d+__" + tableName));
-
-        if(fileNames == null) {
-            return 0L;
-        }
-        return findTheGreatestInSecondDigitOfVersion(fileNames, tableVersion);
-    }
-
-    // used when a table is being created where the third digit of version of a table has to be upgraded.
-    private Long increaseThirdDigitOfVersion(String tableVersion, String tableName) {
-        File files = new File(this.DB_MIGRATION_DIRECTORY);
-        String[] fileNames = files.list((fileIn, fileName) -> fileName.matches(tableVersion +
-                "_\\d+_\\d+__" + tableName));
-
-        if(fileNames == null) {
-            return 0L;
-        }
-        return findTheGreatestInThirdDigitOfVersion(fileNames, tableVersion);
+        return Long.valueOf(thirdDigit);
     }
 }

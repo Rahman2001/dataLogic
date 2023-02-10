@@ -2,34 +2,36 @@ package datalogic.controller;
 
 import datalogic.model.DailyWeather;
 import datalogic.model.UserLocation;
-import datalogic.service.serviceImpl.DailyWeatherAPIClientServiceImpl;
+import datalogic.repository.WeatherRepoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
-@RestController
-@RequestMapping("/weather/daily")
+@RestController("/weather/daily")
 public class DailyWeatherAPI { //returns daily weather forecast
-    private final DailyWeatherAPIClientServiceImpl dailyWeatherAPIClientService;
-
+    private final WeatherRepoService repoService;
     @Autowired
-    public DailyWeatherAPI(final DailyWeatherAPIClientServiceImpl dailyWeatherAPIClientService){
-        this.dailyWeatherAPIClientService = dailyWeatherAPIClientService;
+    public DailyWeatherAPI(final WeatherRepoService repoService){
+        this.repoService = repoService;
     }
 
     @PostMapping
     public ResponseEntity<DailyWeather> getDailyWeatherForCurrentLocation(@RequestBody final UserLocation userLocation){
-        Optional<DailyWeather> dailyWeather = Optional.ofNullable(this.dailyWeatherAPIClientService.getDailyWeather(
-                userLocation.getLat(), userLocation.getLon()));
-        return dailyWeather.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(dailyWeather.get());
+        DailyWeather dailyWeatherFromDb = this.repoService.selectDailyWeather(userLocation.getCity());
+        if(dailyWeatherFromDb == null) {
+            dailyWeatherFromDb = this.repoService.updateOrInsertDailyWeather(userLocation.getLat(), userLocation.getLon(), userLocation.getCity());
+            return dailyWeatherFromDb != null ? ResponseEntity.ok(dailyWeatherFromDb) : ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(dailyWeatherFromDb);
     }
 
     @GetMapping("/{city}")
     public ResponseEntity<DailyWeather> getDailyWeatherForCity(@PathVariable("city") String city) {
-        Optional<DailyWeather> dailyWeather = Optional.ofNullable(this.dailyWeatherAPIClientService.getDailyWeather(city));
-        dailyWeather.ifPresent(weather -> weather.setCity(city));
-        return dailyWeather.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(dailyWeather.get());
+        DailyWeather dailyWeatherFromDb = this.repoService.selectDailyWeather(city);
+        if(dailyWeatherFromDb == null) {
+            dailyWeatherFromDb = this.repoService.updateOrInsertDailyWeather(city);
+            return dailyWeatherFromDb != null ? ResponseEntity.ok(dailyWeatherFromDb) : ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(dailyWeatherFromDb);
     }
 }

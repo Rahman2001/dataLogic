@@ -2,37 +2,37 @@ package datalogic.controller;
 
 import datalogic.model.UserLocation;
 import datalogic.model.Weather;
-import datalogic.service.serviceImpl.WeatherAPIClientServiceImpl;
+import datalogic.repository.WeatherRepoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
-@RestController
-@RequestMapping("/weather")
+@RestController("/weather")
 public class WeatherAPI { //returns current weather data
-    private final WeatherAPIClientServiceImpl weatherAPIClientService;
+    private final WeatherRepoService repoService;
 
     @Autowired
-    public WeatherAPI(final WeatherAPIClientServiceImpl weatherAPIClientService) {
-        this.weatherAPIClientService = weatherAPIClientService;
+    public WeatherAPI(final WeatherRepoService repoService) {
+        this.repoService = repoService;
     }
 
     @PostMapping
     public ResponseEntity<Weather> getCurrentWeatherOfCurrentLocation(@RequestBody final UserLocation userLocation) {
-        Optional<Weather> current = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(userLocation.getLat(), userLocation.getLon()));
-        current.ifPresent(weather -> {
-            weather.setCity(userLocation.getCity());
-            weather.setCountry(userLocation.getCountry());
-        });
-        return current.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(current.get());
+        Weather currentWeatherFromDb = this.repoService.selectCurrentWeather(userLocation.getCity());
+        if(currentWeatherFromDb == null) { // if current weather data taken from database does not exist in db or is out of date (not fresh), then...
+            currentWeatherFromDb = this.repoService.updateOrInsertCurrentWeather(userLocation.getLat(), userLocation.getLon(), userLocation.getCity());
+            return currentWeatherFromDb != null ? ResponseEntity.ok(currentWeatherFromDb) : ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(currentWeatherFromDb);
     }
 
     @GetMapping("/{city}")
     public ResponseEntity<Weather> getCurrentWeather(@PathVariable("city") String city) {
-        Optional<Weather> weatherOfCity = Optional.ofNullable(this.weatherAPIClientService.getCurrentWeatherData(city));
-        weatherOfCity.ifPresent(weather -> weather.setCity(city));
-        return weatherOfCity.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(weatherOfCity.get());
+        Weather currentWeatherFromDb = this.repoService.selectCurrentWeather(city);
+        if(currentWeatherFromDb == null) { // if current weather data taken from database does not exist in db or is out of date (not fresh), then...
+            currentWeatherFromDb = this.repoService.updateOrInsertCurrentWeather(city);
+            return currentWeatherFromDb != null ? ResponseEntity.ok(currentWeatherFromDb) : ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(currentWeatherFromDb);
     }
 }

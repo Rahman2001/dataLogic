@@ -19,9 +19,9 @@ public class DailyWeatherAPIClientServiceImpl {
     @Autowired
     public DailyWeatherAPIClientServiceImpl(final DailyWeatherAPIClientService dailyWeatherAPIClientService,
                                             final @Qualifier("restEndpoints") List<EndpointProperty> restEndpoints,
-                                            ServiceUtil serviceUtil){
+                                            ApiServiceUtil apiServiceUtil){
         this.dailyWeatherAPIClientService = dailyWeatherAPIClientService;
-        this.endpoint = serviceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_dailyWeather_API");
+        this.endpoint = apiServiceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_dailyWeather_API");
     }
 
     public DailyWeather getDailyWeather(Double lat, Double lon){

@@ -44,7 +44,7 @@ spring:
   jpa:
     database: default
   flyway:
-    out-of-order: true
+    out-of-order: false
     ignore-future-migrations: true
     ignore-ignored-migrations: true
     ignore-missing-migrations: true

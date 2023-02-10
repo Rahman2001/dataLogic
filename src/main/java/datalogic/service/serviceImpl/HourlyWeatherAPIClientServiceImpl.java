@@ -19,9 +19,9 @@ public class HourlyWeatherAPIClientServiceImpl {
     @Autowired
     public HourlyWeatherAPIClientServiceImpl(final @Qualifier("restEndpoints")List<EndpointProperty> restEndpoints,
                                              final HourlyWeatherAPIClientService hourlyWeatherAPIClientService,
-                                             final ServiceUtil serviceUtil){
+                                             final ApiServiceUtil apiServiceUtil){
         this.hourlyWeatherAPIClientService = hourlyWeatherAPIClientService;
-        this.endpoint = serviceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_hourlyWeather_API");
+        this.endpoint = apiServiceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_hourlyWeather_API");
     }
 
     public HourlyWeather getHourlyWeather(Double lat, Double lon) {

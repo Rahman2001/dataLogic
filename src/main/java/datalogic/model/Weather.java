@@ -13,7 +13,7 @@ import lombok.experimental.Tolerate;
 @SuperBuilder(toBuilder = true)
 @JsonDeserialize(using = CurrentWeatherDeserializer.class)
 public class Weather {
-    private String api_name;
+    private String api_name = "current_weather";
     @JsonProperty("dt")
     private String dateTime;
     @JsonProperty("description")

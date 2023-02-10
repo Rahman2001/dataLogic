@@ -1,7 +1,7 @@
 package datalogic.config;
 
 import datalogic.service.clientService.*;
-import datalogic.service.serviceImpl.ServiceUtil;
+import datalogic.service.serviceImpl.ApiServiceUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +38,14 @@ public class RestServiceForRetrofit {
                                   @NonNull @Value("${retrofit.integration.cacheSizeInMb}") final Long RETROFIT_CACHE_SIZE,
                                   @NonNull @Value("${retrofit.integration.cacheDirectory}") String RETROFIT_CACHE_DIRECTORY,
                                   @NonNull @Value("${retrofit.integration.longRunningReadTimeout}") Long RETROFIT_LONG_READING_TIMEOUT,
-                                  ServiceUtil serviceUtil)
+                                  ApiServiceUtil apiServiceUtil)
     {
         this.RETROFIT_CACHE_SIZE = RETROFIT_CACHE_SIZE;
         this.RETROFIT_CACHE_DIRECTORY = new File(RETROFIT_CACHE_DIRECTORY);
         this.RETROFIT_LONG_RUNNING_READ_TIMEOUT = RETROFIT_LONG_READING_TIMEOUT;
         this.RETROFIT_DEFAULT_READ_TIMEOUT = 200L;
 
-        this.endpointPropertyMap = serviceUtil.groupsEndpoints(restEndpoints);
+        this.endpointPropertyMap = apiServiceUtil.groupsEndpoints(restEndpoints);
         this.okHttpClient = defaultSetup();
         this.jacksonConverterFactory = JacksonConverterFactory.create();
     }

@@ -3,7 +3,7 @@ package serviceTests.serviceImplTests;
 import datalogic.config.EndpointProperty;
 import datalogic.model.Weather;
 import datalogic.service.clientService.WeatherAPIClientService;
-import datalogic.service.serviceImpl.ServiceUtil;
+import datalogic.service.serviceImpl.ApiServiceUtil;
 import datalogic.service.serviceImpl.WeatherAPIClientServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +23,12 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {ServiceUtil.class})
+@ContextConfiguration(classes = {ApiServiceUtil.class})
 public class WeatherAPIServiceImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private WeatherAPIClientService client;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ServiceUtil serviceUtil;
+    private ApiServiceUtil apiServiceUtil;
     private Map<String, EndpointProperty> endpointPropertyMap;
 
     @InjectMocks
@@ -42,7 +42,7 @@ public class WeatherAPIServiceImplTest {
 
     @Test
     public void weatherAPIServiceImplTest() throws ExecutionException, InterruptedException {
-        when(this.serviceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
+        when(this.apiServiceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
         when(this.client.getWeatherData(anyString(), anyDouble(), anyDouble(), anyString(), anyString()).get())
                 .thenReturn(Weather.builder().build());
         Weather weather = this.serviceImpl.getCurrentWeatherData(23.0, 22.11);

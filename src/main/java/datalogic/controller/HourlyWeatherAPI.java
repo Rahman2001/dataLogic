@@ -2,35 +2,38 @@ package datalogic.controller;
 
 import datalogic.model.HourlyWeather;
 import datalogic.model.UserLocation;
-import datalogic.service.serviceImpl.HourlyWeatherAPIClientServiceImpl;
+import datalogic.repository.WeatherRepoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/weather/hourly")
 public class HourlyWeatherAPI { //returns hourly weather forecast
-    private final HourlyWeatherAPIClientServiceImpl hourlyWeatherAPIClientService;
+    private final WeatherRepoService repoService;
 
     @Autowired
-    public HourlyWeatherAPI(final HourlyWeatherAPIClientServiceImpl hourlyWeatherAPIClientServiceImpl){
-        this.hourlyWeatherAPIClientService = hourlyWeatherAPIClientServiceImpl;
+    public HourlyWeatherAPI(final WeatherRepoService repoService){
+        this.repoService = repoService;
     }
 
     @PostMapping
     public ResponseEntity<HourlyWeather> getHourlyWeatherOfCurrentLocation(@RequestBody final UserLocation userLocation){
-        Optional<HourlyWeather> hourlyWeather = Optional.ofNullable(this.hourlyWeatherAPIClientService.getHourlyWeather(
-                userLocation.getLat(), userLocation.getLon()));
-        return hourlyWeather.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(hourlyWeather.get());
+        HourlyWeather hourlyWeatherFromDb = this.repoService.selectHourlyWeather(userLocation.getCity());
+        if(hourlyWeatherFromDb == null) {
+            hourlyWeatherFromDb = this.repoService.updateOrInsertHourlyWeather(userLocation.getLat(), userLocation.getLon(), userLocation.getCity());
+            return hourlyWeatherFromDb != null ? ResponseEntity.ok(hourlyWeatherFromDb) : ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(hourlyWeatherFromDb);
     }
 
     @GetMapping("/{city}")
     public ResponseEntity<HourlyWeather> getHourlyWeather(@PathVariable("city") String city) {
-        Optional<HourlyWeather> hourlyWeather = Optional.ofNullable(this.hourlyWeatherAPIClientService.getHourlyWeather(city));
-        hourlyWeather.ifPresent(weather -> weather.setCity(city));
-        return hourlyWeather.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(hourlyWeather.get());
+        HourlyWeather hourlyWeatherFromDb = this.repoService.selectHourlyWeather(city);
+        if(hourlyWeatherFromDb == null) {
+            hourlyWeatherFromDb = this.repoService.updateOrInsertHourlyWeather(city);
+            return hourlyWeatherFromDb != null ? ResponseEntity.ok(hourlyWeatherFromDb) : ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(hourlyWeatherFromDb);
     }
 }

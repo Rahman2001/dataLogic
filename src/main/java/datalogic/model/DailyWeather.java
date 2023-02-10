@@ -15,7 +15,7 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @JsonDeserialize(using = DailyWeatherDeserializer.class)
 public class DailyWeather extends Weather{
-    private String api_name;
+    private String api_name = "daily_weather";
     @JsonProperty("cnt")
     private Integer forecastedTotalDays;
     @JsonProperty("list")

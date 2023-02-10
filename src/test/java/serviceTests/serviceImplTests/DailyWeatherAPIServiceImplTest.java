@@ -4,7 +4,7 @@ import datalogic.config.EndpointProperty;
 import datalogic.model.DailyWeather;
 import datalogic.service.clientService.DailyWeatherAPIClientService;
 import datalogic.service.serviceImpl.DailyWeatherAPIClientServiceImpl;
-import datalogic.service.serviceImpl.ServiceUtil;
+import datalogic.service.serviceImpl.ApiServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +27,12 @@ ServiceUtil.groupByEndpoints() passes mocked data to Map that is used by Endpoin
 // For more details, documentation: https://www.javadoc.io/doc/org.mockito/mockito-core/2.2.9/org/mockito/Mockito.html#RETURNS_DEEP_STUBS
 
 @ExtendWith({MockitoExtension.class})
-@ContextConfiguration(classes = {ServiceUtil.class})
+@ContextConfiguration(classes = {ApiServiceUtil.class})
 public class DailyWeatherAPIServiceImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DailyWeatherAPIClientService dailyWeatherAPIClientService;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ServiceUtil serviceUtil;
+    private ApiServiceUtil apiServiceUtil;
     private Map<String, EndpointProperty> endpointPropertyMap;
 
     @InjectMocks
@@ -48,7 +48,7 @@ public class DailyWeatherAPIServiceImplTest {
 
     @Test
     public void getDailyWeatherTest(){
-        when(this.serviceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
+        when(this.apiServiceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
         when(this.dailyWeatherAPIClientService.getDailyWeather(anyString(), anyDouble(), anyDouble(), anyString(), anyString()).join())
                 .thenReturn(new DailyWeather());
         assertNotNull(this.dailyWeatherAPIClientServiceImpl.getDailyWeather(0.0, 0.0));

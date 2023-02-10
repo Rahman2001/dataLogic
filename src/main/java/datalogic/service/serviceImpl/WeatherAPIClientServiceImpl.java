@@ -20,9 +20,9 @@ public class WeatherAPIClientServiceImpl{
     @Autowired
     public WeatherAPIClientServiceImpl(final WeatherAPIClientService weatherRestAPI,
                                        final @Qualifier("restEndpoints") List<EndpointProperty> restEndpoints,
-                                       final ServiceUtil serviceUtil) {
+                                       final ApiServiceUtil apiServiceUtil) {
         this.weatherAPIClientService = weatherRestAPI;
-        this.endpoint = serviceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_currentWeather_API");
+        this.endpoint = apiServiceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_currentWeather_API");
     }
 
     public Weather getCurrentWeatherData(Double latitude, Double longitude) {
