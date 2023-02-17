@@ -12,6 +12,7 @@ begin
     else select * from current_weather where city = cityName;
     end if;
 end$$
+
 create procedure selectHourlyWeatherIfUpdate(IN cityName varchar(25))
 begin
     declare difference bigint default 100;

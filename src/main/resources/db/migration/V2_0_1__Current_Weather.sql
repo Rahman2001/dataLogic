@@ -15,4 +15,7 @@ wind INT,
 clouds INT,
 
 CONSTRAINT fr_key FOREIGN KEY (city) REFERENCES locations(city)
-ON DELETE CASCADE ON UPDATE CASCADE );
+ON DELETE CASCADE ON UPDATE CASCADE);
+#
+# INSERT INTO current_weather (city, country, date_time)
+# VALUES ("Ankara", "Turkey", "2023-02-15 16:26");

@@ -2,6 +2,7 @@ package serviceTests.serviceImplTests;
 
 import datalogic.config.EndpointProperty;
 import datalogic.model.DailyWeather;
+import datalogic.service.ServiceUtil;
 import datalogic.service.clientService.DailyWeatherAPIClientService;
 import datalogic.service.serviceImpl.DailyWeatherAPIClientServiceImpl;
 import datalogic.service.serviceImpl.ApiServiceUtil;
@@ -32,7 +33,7 @@ public class DailyWeatherAPIServiceImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DailyWeatherAPIClientService dailyWeatherAPIClientService;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ApiServiceUtil apiServiceUtil;
+    private ServiceUtil serviceUtil;
     private Map<String, EndpointProperty> endpointPropertyMap;
 
     @InjectMocks
@@ -48,7 +49,7 @@ public class DailyWeatherAPIServiceImplTest {
 
     @Test
     public void getDailyWeatherTest(){
-        when(this.apiServiceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
+        when(this.serviceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
         when(this.dailyWeatherAPIClientService.getDailyWeather(anyString(), anyDouble(), anyDouble(), anyString(), anyString()).join())
                 .thenReturn(new DailyWeather());
         assertNotNull(this.dailyWeatherAPIClientServiceImpl.getDailyWeather(0.0, 0.0));

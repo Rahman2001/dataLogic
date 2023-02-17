@@ -49,9 +49,11 @@ spring:
     ignore-ignored-migrations: true
     ignore-missing-migrations: true
     baseline-on-migrate: true
-    location: classpath:/db/migration/
+    location: classpath:/db/migration
   datasource:
     url: jdbc:mysql://localhost:3306/weather
     username: root
     password: ${MySQL-PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  database:
+    geolocation: Ankara

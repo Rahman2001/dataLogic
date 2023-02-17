@@ -1,7 +1,6 @@
 package datalogic.config;
 
 import datalogic.service.clientService.*;
-import datalogic.service.serviceImpl.ApiServiceUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 @Slf4j
 @Component
@@ -37,15 +39,14 @@ public class RestServiceForRetrofit {
     public RestServiceForRetrofit(@Qualifier("restEndpoints") final List<EndpointProperty> restEndpoints,
                                   @NonNull @Value("${retrofit.integration.cacheSizeInMb}") final Long RETROFIT_CACHE_SIZE,
                                   @NonNull @Value("${retrofit.integration.cacheDirectory}") String RETROFIT_CACHE_DIRECTORY,
-                                  @NonNull @Value("${retrofit.integration.longRunningReadTimeout}") Long RETROFIT_LONG_READING_TIMEOUT,
-                                  ApiServiceUtil apiServiceUtil)
+                                  @NonNull @Value("${retrofit.integration.longRunningReadTimeout}") Long RETROFIT_LONG_READING_TIMEOUT)
     {
         this.RETROFIT_CACHE_SIZE = RETROFIT_CACHE_SIZE;
         this.RETROFIT_CACHE_DIRECTORY = new File(RETROFIT_CACHE_DIRECTORY);
         this.RETROFIT_LONG_RUNNING_READ_TIMEOUT = RETROFIT_LONG_READING_TIMEOUT;
         this.RETROFIT_DEFAULT_READ_TIMEOUT = 200L;
 
-        this.endpointPropertyMap = apiServiceUtil.groupsEndpoints(restEndpoints);
+        this.endpointPropertyMap = groupEndpoints(restEndpoints);
         this.okHttpClient = defaultSetup();
         this.jacksonConverterFactory = JacksonConverterFactory.create();
     }
@@ -85,5 +86,8 @@ public class RestServiceForRetrofit {
                 .addConverterFactory(this.jacksonConverterFactory)
                 .build();
         return retrofit.create(HourlyWeatherAPIClientService.class);
+    }
+    private Map<String, EndpointProperty> groupEndpoints(List<EndpointProperty> restEndpoints) {
+        return restEndpoints.stream().collect(toImmutableMap(EndpointProperty::getServiceName, Function.identity()));
     }
 }

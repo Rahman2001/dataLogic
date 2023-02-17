@@ -3,7 +3,7 @@ package serviceTests.serviceImplTests;
 import datalogic.config.EndpointProperty;
 import datalogic.config.RetrofitConfig;
 import datalogic.config.RetrofitProperties;
-import datalogic.service.serviceImpl.ApiServiceUtil;
+import datalogic.service.ServiceUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +17,14 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {RetrofitProperties.class, RetrofitConfig.class})
-public class ApiServiceUtilTest {
+public class ServiceUtilTest {
     @Autowired
     RetrofitProperties retrofitProperties;
     @Test
     public void serviceUtilTest(){
-        ApiServiceUtil apiServiceUtil = new ApiServiceUtil();
+        ServiceUtil serviceUtil = new ServiceUtil();
         List<EndpointProperty> endpointProperties = retrofitProperties.getEndpoints();
-        Map<String, EndpointProperty> endpointPropertyMap = apiServiceUtil.groupsEndpoints(endpointProperties);
+        Map<String, EndpointProperty> endpointPropertyMap = serviceUtil.groupsEndpoints(endpointProperties);
         assertTrue("No element in the Map", endpointPropertyMap.size() != 0);
     }
 }

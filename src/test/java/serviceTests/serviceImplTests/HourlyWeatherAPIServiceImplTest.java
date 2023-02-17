@@ -4,6 +4,7 @@ import datalogic.config.EndpointProperty;
 import datalogic.config.RetrofitConfig;
 import datalogic.config.RetrofitProperties;
 import datalogic.model.HourlyWeather;
+import datalogic.service.ServiceUtil;
 import datalogic.service.clientService.HourlyWeatherAPIClientService;
 import datalogic.service.serviceImpl.HourlyWeatherAPIClientServiceImpl;
 import datalogic.service.serviceImpl.ApiServiceUtil;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = {RetrofitConfig.class, RetrofitProperties.class})
 public class HourlyWeatherAPIServiceImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ApiServiceUtil apiServiceUtil;
+    private ServiceUtil serviceUtil;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private HourlyWeatherAPIClientService client;
     @MockBean(name = "restEndpoints")
@@ -49,11 +50,11 @@ public class HourlyWeatherAPIServiceImplTest {
 
     @Test
     public void hourlyWeatherAPIServiceImplTest() throws ExecutionException, InterruptedException {
-        when(this.apiServiceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
-        when(this.client.getHourlyWeather(anyString(),anyDouble(), anyDouble(), anyString(), anyString()).get())
+        when(this.serviceUtil.groupsEndpoints(anyList())).thenReturn(this.endpointPropertyMap);
+        when(this.client.getHourlyWeather(anyString(),anyDouble(), anyDouble(), anyString(), 5, anyString()).get())
                 .thenReturn(HourlyWeather.builder().build());
         HourlyWeather hourlyWeather = serviceImpl.getHourlyWeather(22.0, 23.2);
         assertNotNull(hourlyWeather);
-        verify(this.client, times(1)).getHourlyWeather(anyString(),anyDouble(), anyDouble(), anyString(), anyString());
+        verify(this.client, times(1)).getHourlyWeather(anyString(),anyDouble(), anyDouble(), anyString(), 5, anyString());
     }
 }

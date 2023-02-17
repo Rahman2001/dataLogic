@@ -3,145 +3,233 @@ package datalogic.repository;
 import datalogic.model.DailyWeather;
 import datalogic.model.HourlyWeather;
 import datalogic.model.Weather;
-import datalogic.service.serviceImpl.ApiServiceUtil;
+import datalogic.repository.rowMappers.DailyWeatherRowMapper;
+import datalogic.repository.rowMappers.HourlyWeatherRowMapper;
+import datalogic.repository.rowMappers.WeatherRowMapper;
+import datalogic.service.FlywayMigrationService;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class WeatherRepoService {
-    private final WeatherRepo weatherRepo;
-    private final ApiServiceUtil apiServiceUtil;
+
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final FlywayMigrationService flywayMigrationService;
 
     @Autowired
-    public WeatherRepoService(WeatherRepo weatherRepo, ApiServiceUtil apiServiceUtil) {
-        this.weatherRepo = weatherRepo;
-        this.apiServiceUtil = apiServiceUtil;
-    }
-    //below methods are used currently, if you want more detailed database operations, feel free to build using WeatherRepo.
-
-    public Weather updateOrInsertCurrentWeather(@NotNull String city) {
-        return this.weatherRepo.exists(city) ? this.updatedAll(city, Weather.class)
-                : this.insertedAll(city, Weather.class);
-    }
-    public Weather updateOrInsertCurrentWeather(@NotNull Double lat, @NotNull Double lon, @NotNull String city) {
-        return this.weatherRepo.exists(city) ? this.updatedAll(lat, lon, city, Weather.class)
-                : this.insertedAll(city, Weather.class);
-    }
-    public HourlyWeather updateOrInsertHourlyWeather(@NotNull String city) {
-        return this.weatherRepo.exists(city) ? this.updatedAll(city, HourlyWeather.class)
-                : this.insertedAll(city, HourlyWeather.class);
-    }
-    public HourlyWeather updateOrInsertHourlyWeather(@NotNull Double lat, @NotNull Double lon, @NotNull String city) {
-        return this.weatherRepo.exists(city) ? this.updatedAll(lat, lon, city, HourlyWeather.class)
-                : this.insertedAll(lat, lon, city, HourlyWeather.class);
-    }
-    public DailyWeather updateOrInsertDailyWeather(@NotNull String city) {
-        return this.weatherRepo.exists(city) ? this.updatedAll(city, DailyWeather.class)
-                : this.insertedAll(city, DailyWeather.class);
-    }
-    public DailyWeather updateOrInsertDailyWeather(@NotNull Double lat, @NotNull Double lon, @NotNull String city) {
-        return this.weatherRepo.exists(city) ? this.updatedAll(lat, lon, city, DailyWeather.class)
-                : this.insertedAll(lat, lon, city, DailyWeather.class);
-    }
-    private Boolean updatedOrInsertLocation(@NotNull String city, @NotNull String country) {
-        return this.weatherRepo.exists(city) ? this.weatherRepo.updatedLocation(city)
-                : this.weatherRepo.insertedLocation(city, country);
+    public WeatherRepoService(NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+                              FlywayMigrationService flywayMigrationService){
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.flywayMigrationService = flywayMigrationService;
     }
 
-    public Weather selectCurrentWeather(@NotNull String city) {
-        return this.weatherRepo.selectCurrentWeather(city);
+    @Async
+    public CompletableFuture<Weather> selectCurrentWeather(@NotNull String city) {
+        String queryForCurrentWeather = "CALL selectCurrentWeatherIfUpdate(?)";
+        Optional<Weather> weather = Optional.ofNullable(this.namedParameterJdbcTemplate.getJdbcTemplate()
+                .queryForObject(queryForCurrentWeather, new WeatherRowMapper(), city));
+        return CompletableFuture.completedFuture(weather.orElse(null));
     }
-    public HourlyWeather selectHourlyWeather(@NotNull String city) {
-        return this.weatherRepo.selectHourlyWeather(city);
+    @Async
+    public CompletableFuture<HourlyWeather> selectHourlyWeather(@NotNull String city) {
+        String queryForHourlyWeather = "CALL selectHourlyWeatherIfUpdate(?)";
+        Optional<HourlyWeather> hourlyWeather = Optional.ofNullable(this.namedParameterJdbcTemplate.getJdbcTemplate()
+                .queryForObject(queryForHourlyWeather, new HourlyWeatherRowMapper(), city));
+        return CompletableFuture.completedFuture(hourlyWeather.orElse(null));
     }
-    public DailyWeather selectDailyWeather(@NotNull String city) {
-        return this.weatherRepo.selectDailyWeather(city);
+    @Async
+    public CompletableFuture<DailyWeather> selectDailyWeather(@NotNull String city) {
+        String queryForDailyWeather = "CALL selectDailyWeatherIfUpdate(?)";
+        Optional<DailyWeather> dailyWeather = Optional.ofNullable(this.namedParameterJdbcTemplate.getJdbcTemplate()
+                .queryForObject(queryForDailyWeather, new DailyWeatherRowMapper(), city));
+        return CompletableFuture.completedFuture(dailyWeather.orElse(null));
     }
-    private Map<String, ? extends Weather> loadWeathersFromExternalProvider(String city) {
-        Map<String, ? extends Weather> weathers = this.apiServiceUtil.callAll(city);
-        Weather currentWeather = weathers.get(Weather.class.getName());
-        currentWeather.setCity(city);
-
-        HourlyWeather hourlyWeather = (HourlyWeather) weathers.get(HourlyWeather.class.getName());
-        List<Weather> list = hourlyWeather.getHourlyWeatherList();
-        list.forEach(w-> w.setCity(city));
-        hourlyWeather.setHourlyWeatherList(list);
-
-        DailyWeather dailyWeather = (DailyWeather) weathers.get(DailyWeather.class.getName());
-        list = dailyWeather.getDailyWeatherList();
-        list.forEach(w-> w.setCity(city));
-        dailyWeather.setDailyWeatherList(list);
-        return weathers;
+    public SqlRowSet selectAllLocations() {
+        String query = "SELECT city, updated_time FROM locations ORDER BY updated_time";
+        return this.namedParameterJdbcTemplate.getJdbcOperations().queryForRowSet(query);
     }
-    private Map<String, ? extends Weather> loadWeathersFromExternalProvider(Double lat, Double lon, String city) {
-        Map<String, ? extends Weather> weathers = this.apiServiceUtil.callAll(lat, lon);
-        Weather currentWeather = weathers.get(Weather.class.getName());
-        currentWeather.setCity(city);
-
-        HourlyWeather hourlyWeather = (HourlyWeather) weathers.get(HourlyWeather.class.getName());
-        List<Weather> list = hourlyWeather.getHourlyWeatherList();
-        list.forEach(w-> w.setCity(city));
-        hourlyWeather.setHourlyWeatherList(list);
-
-        DailyWeather dailyWeather = (DailyWeather) weathers.get(DailyWeather.class.getName());
-        list = dailyWeather.getDailyWeatherList();
-        list.forEach(w-> w.setCity(city));
-        dailyWeather.setDailyWeatherList(list);
-        return weathers;
+    @SuppressWarnings("all")
+    public Boolean exists(@NotNull String city) {
+        String query = "SELECT EXISTS (SELECT city FROM locations WHERE city = :city) AS isTrue";
+        Map<String, String> locationMap = new HashMap<>();
+        locationMap.put("city", city);
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource(locationMap);
+        return this.namedParameterJdbcTemplate.execute(query, parameterSource, ps -> {
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt("isTrue") : -1;
+        }) > 0;
     }
-
-    @Nullable
-    @SuppressWarnings("cast")
-    private <T extends Weather> T updatedAll(String city, Class<T> weatherTypeForReturn) {
-        Map<String, ? extends Weather> map = this.loadWeathersFromExternalProvider(city);
-        Weather currentWeather = map.get(Weather.class.getName());
-        HourlyWeather hourlyWeather = (HourlyWeather) map.get(HourlyWeather.class.getName());
-        DailyWeather dailyWeather = (DailyWeather) map.get(DailyWeather.class.getName());
-
-        return this.weatherRepo.updatedAllWeathers(currentWeather, hourlyWeather, dailyWeather)
-                && this.updatedOrInsertLocation(city, currentWeather.getCountry()) ?
-                (T) map.get(weatherTypeForReturn.getName()) : null;
+    public Boolean insertedAllWeather(@NotNull Weather weather, @NotNull HourlyWeather hourlyWeather, @NotNull DailyWeather dailyWeather) {
+        Boolean isLocationInserted = this.insertedLocation(weather.getCity(), weather.getCountry());
+        CompletableFuture<Boolean> currentWeatherInserted = CompletableFuture.supplyAsync(() -> this.insertedCurrentWeather(weather));
+        CompletableFuture<Boolean> hourlyWeatherInserted = CompletableFuture.supplyAsync(() -> this.insertedHourlyWeather(hourlyWeather));
+        CompletableFuture<Boolean> dailyWeatherInserted = CompletableFuture.supplyAsync(() -> this.insertedDailyWeather(dailyWeather));
+        List<CompletableFuture<Boolean>> areAllInserted = List.of(currentWeatherInserted, hourlyWeatherInserted, dailyWeatherInserted);
+        return isLocationInserted && CompletableFuture.allOf(areAllInserted.toArray(CompletableFuture[]::new)).
+                thenApply(f -> areAllInserted.stream().map(CompletableFuture::join).filter(isInserted ->
+                        isInserted.booleanValue() == Boolean.TRUE).count())
+                .join().intValue() == areAllInserted.size();
     }
-    @Nullable
-    @SuppressWarnings("cast")
-    private <T extends Weather> T updatedAll(Double lat, Double lon, String city, Class<T> weatherTypeForReturn) {
-        Map<String, ? extends Weather> map = this.loadWeathersFromExternalProvider(lat, lon, city);
-        Weather currentWeather = map.get(Weather.class.getName());
-        HourlyWeather hourlyWeather = (HourlyWeather) map.get(HourlyWeather.class.getName());
-        DailyWeather dailyWeather = (DailyWeather) map.get(DailyWeather.class.getName());
-
-        return this.weatherRepo.updatedAllWeathers(currentWeather, hourlyWeather, dailyWeather)
-                && this.updatedOrInsertLocation(city, currentWeather.getCountry()) ?
-                (T) map.get(weatherTypeForReturn.getName()) : null;
+    public Boolean insertedCurrentWeather(@NotNull Weather currentWeather) {
+        String query = "INSERT INTO Current_Weather " +
+                "(date_time, description, temp, temp_min, temp_max, pressure, humidity, wind, feels_like, clouds, city, country) " +
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+        Object[] values = new Object[] {
+                currentWeather.getDateTime(), currentWeather.getDescription(), currentWeather.getTemp(),
+                currentWeather.getTempMin(), currentWeather.getTempMax(), currentWeather.getPressure(),
+                currentWeather.getHumidity(), currentWeather.getWind(), currentWeather.getFeelsLike(),
+                currentWeather.getClouds(), currentWeather.getCity(), currentWeather.getCountry()};
+        int updatedNumber = this.namedParameterJdbcTemplate.getJdbcTemplate().update(query, values);
+        return this.isInserted(updatedNumber, 1);
     }
 
-    @Nullable
-    @SuppressWarnings("cast")
-    private <T extends Weather> T insertedAll(String city, Class<T> weatherTypeForReturn) {
-        Map<String, ? extends Weather> map = this.loadWeathersFromExternalProvider(city);
-        Weather currentWeather = map.get(Weather.class.getName());
-        HourlyWeather hourlyWeather = (HourlyWeather) map.get(HourlyWeather.class.getName());
-        DailyWeather dailyWeather = (DailyWeather) map.get(DailyWeather.class.getName());
+    //we used Batch operation to minimise network trips between application and database.
+    public Boolean insertedHourlyWeather(@NotNull HourlyWeather hourlyWeather) {
+        String parameterizedQuery = "INSERT INTO Hourly_Weather" +
+                " (city, country, description, date_time, temp, temp_min, temp_max, pressure, humidity, wind, feels_like, clouds) " +
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+        List<Object[]> values = new ArrayList<>();
 
-        return this.weatherRepo.insertedAllWeather(currentWeather, hourlyWeather, dailyWeather)
-                && this.updatedOrInsertLocation(city, currentWeather.getCountry())?
-                (T) map.get(weatherTypeForReturn.getName()) : null;
+        hourlyWeather.getHourlyWeatherList().forEach(weather -> {
+            Object[] valuesOfWeather = new Object[]{
+                    hourlyWeather.getCity(), weather.getCountry(), weather.getDescription(),
+                    weather.getDateTime(), weather.getTemp(), weather.getTempMin(),
+                    weather.getTempMax(), weather.getPressure(), weather.getHumidity(),
+                    weather.getWind(), weather.getFeelsLike(), weather.getClouds()};
+            values.add(valuesOfWeather);
+        });
+        CompletableFuture<Integer> executedBatchNumber = this.executedBatchNumber(parameterizedQuery, values);
+        return this.isInserted(executedBatchNumber.join(), 1);
     }
-    @Nullable
-    @SuppressWarnings("cast")
-    private <T extends Weather> T insertedAll(Double lat, Double lon, String city, Class<T> weatherTypeForReturn) {
-        Map<String, ? extends Weather> map = this.loadWeathersFromExternalProvider(lat, lon, city);
-        Weather currentWeather = map.get(Weather.class.getName());
-        HourlyWeather hourlyWeather = (HourlyWeather) map.get(HourlyWeather.class.getName());
-        DailyWeather dailyWeather = (DailyWeather) map.get(DailyWeather.class.getName());
 
-        return this.weatherRepo.insertedAllWeather(currentWeather, hourlyWeather, dailyWeather)
-                && this.updatedOrInsertLocation(city, currentWeather.getCountry())?
-                (T) map.get(weatherTypeForReturn.getName()) : null;
+    public Boolean insertedDailyWeather(@NotNull DailyWeather dailyWeather) {
+        String parameterizedQuery = "INSERT INTO Daily_Weather" +
+                " (city, country, description, date_time, temp, temp_min, temp_max, pressure, humidity, wind, clouds) " +
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+        List<Object[]> values = new ArrayList<>();
+
+        dailyWeather.getDailyWeatherList().forEach(weather -> {
+            Object[] valuesOfWeather = new Object[]{
+                    dailyWeather.getCity(), weather.getCountry(), weather.getDescription(),
+                    weather.getDateTime(), weather.getTemp(), weather.getTempMin(),
+                    weather.getTempMax(), weather.getPressure(), weather.getHumidity(),
+                    weather.getWind(), weather.getClouds()};
+            values.add(valuesOfWeather);
+        });
+        CompletableFuture<Integer> executedBatchNumber = this.executedBatchNumber(parameterizedQuery, values);
+        return this.isInserted(executedBatchNumber.join(), 1);
+    }
+    public Boolean insertedLocation(@NotNull String cityName, @NotNull String countryName) {
+        String query = "INSERT INTO locations (city, country) VALUES (:city, :country)";
+        Map<String, String> locationMap = new HashMap<>();
+        locationMap.put("city", cityName);
+        locationMap.put("country", countryName);
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource(locationMap);
+        int updatedNumber = this.namedParameterJdbcTemplate.update(query, parameterSource);
+        return this.isInserted(updatedNumber, 1);
+    }
+
+    public Boolean updatedAllWeathers(@NotNull Weather weather, @NotNull HourlyWeather hourlyWeather, @NotNull DailyWeather dailyWeather) {
+        CompletableFuture<Boolean> currentWeatherUpdated = CompletableFuture.supplyAsync(() -> this.updatedCurrentWeather(weather));
+        CompletableFuture<Boolean> hourlyWeatherUpdated = CompletableFuture.supplyAsync(() -> this.updatedHourlyWeather(hourlyWeather));
+        CompletableFuture<Boolean> dailyWeatherUpdated = CompletableFuture.supplyAsync(() -> this.updatedDailyWeather(dailyWeather));
+        List<CompletableFuture<Boolean>> areAllUpdated = List.of(currentWeatherUpdated, hourlyWeatherUpdated, dailyWeatherUpdated);
+        return CompletableFuture.allOf(areAllUpdated.toArray(CompletableFuture[]::new)).thenApply(f ->{
+                long updatedRows = areAllUpdated.stream().map(CompletableFuture::join).filter(isUpdated -> isUpdated.booleanValue() == Boolean.TRUE).count();
+                return updatedLocation(weather.getCity()) ? updatedRows : 0L;
+        })
+                .join().intValue() == areAllUpdated.size();
+    }
+    public Boolean updatedCurrentWeather(@NotNull Weather weather) {
+        String parameterizedQuery = "UPDATE Current_Weather SET " +
+                "date_time = ?, description = ?, temp = ?, temp_min = ?, temp_max = ?, feels_like = ?, " +
+                "pressure = ?, humidity = ?, wind = ?, clouds = ? WHERE city = ?";
+        Object[] values = new Object[]{
+                weather.getDateTime(),weather.getDescription(), weather.getTemp(),
+                weather.getTempMin(), weather.getTempMax(), weather.getFeelsLike(),
+                weather.getPressure(), weather.getHumidity(), weather.getWind(),
+                weather.getClouds(), weather.getCity()};
+        int updatedRows = this.namedParameterJdbcTemplate.getJdbcTemplate().update(parameterizedQuery, values);
+        return this.isUpdated(updatedRows, 1);
+    }
+    @SuppressWarnings("all")
+    public Boolean updatedHourlyWeather(@NotNull HourlyWeather hourlyWeather) {
+        String deleteQuery = "DELETE FROM Hourly_Weather WHERE city = :city";
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource("city", hourlyWeather.getCity());
+        this.namedParameterJdbcTemplate.execute(deleteQuery, mapSqlParameterSource, PreparedStatement::executeUpdate);
+            String parameterizedQuery = "INSERT INTO Hourly_Weather (date_time, description, temp, temp_min, temp_max, " +
+                    "feels_like, pressure, humidity, wind, clouds, city) " +
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+            List<Object[]> values = new ArrayList<>();
+            hourlyWeather.getHourlyWeatherList().forEach(weather -> {
+                Object[] valuesOfWeather = new Object[]{
+                        weather.getDateTime(), weather.getDescription(),
+                        weather.getTemp(), weather.getTempMin(), weather.getTempMax(),
+                        weather.getFeelsLike(), weather.getPressure(), weather.getHumidity(),
+                        weather.getWind(), weather.getClouds(), hourlyWeather.getCity()};
+                values.add(valuesOfWeather);
+            });
+            CompletableFuture<Integer> executedNumber = this.executedBatchNumber(parameterizedQuery, values);
+            return this.isUpdated(executedNumber.join(), 1);
+    }
+    @SuppressWarnings("all")
+    public Boolean updatedDailyWeather(@NotNull DailyWeather dailyWeather) {
+        String deleteQuery = "DELETE FROM Daily_Weather WHERE city = :city";
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource("city", dailyWeather.getCity());
+        this.namedParameterJdbcTemplate.execute(deleteQuery, mapSqlParameterSource, PreparedStatement::executeUpdate);
+            String parameterizedQuery = "INSERT INTO Daily_Weather " +
+                    "(date_time, description, temp, temp_min, temp_max, pressure, humidity, wind, clouds, city) " +
+                    "VALUES(?,?,?,?,?,?,?,?,?,?)";
+            List<Object[]> values = new ArrayList<>();
+            dailyWeather.getDailyWeatherList().forEach(weather -> {
+                Object[] valuesOfWeather = new Object[]{
+                        weather.getDateTime(), weather.getDescription(),
+                        weather.getTemp(), weather.getTempMin(), weather.getTempMax(),
+                        weather.getPressure(), weather.getHumidity(),
+                        weather.getWind(), weather.getClouds(), dailyWeather.getCity()};
+                values.add(valuesOfWeather);
+            });
+            CompletableFuture<Integer> executedNumber = this.executedBatchNumber(parameterizedQuery, values);
+            return this.isUpdated(executedNumber.join(), 1);
+    }
+    public Boolean updatedLocation(@NotNull String city) {
+        String query = "UPDATE locations SET updated_time = NOW() WHERE city = :city";
+        Map<String, String> locationMap = new HashMap<>();
+        locationMap.put("city", city);
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource(locationMap);
+        int updatedNumber = this.namedParameterJdbcTemplate.update(query, parameterSource);
+        return this.isUpdated(updatedNumber, 1);
+    }
+
+    @Async
+    CompletableFuture<Integer> executedBatchNumber(@NotNull String parameterizedQuery, @NotNull List<Object[]> parameterValues) {
+        return CompletableFuture.supplyAsync(() -> this.namedParameterJdbcTemplate.getJdbcTemplate().update(parameterizedQuery, ps -> {
+            for (Object[] objects : parameterValues) {
+                new ArgumentPreparedStatementSetter(objects).setValues(ps);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }));
+    }
+
+    //All methods below check if queries are executed successfully and inserts SQL scripts into the file (.sql) of corresponding table.
+    //We insert SQL scripts into the file because when application is rerun, all the modification in tables could take place in other users' app (for development and test purposes only).
+    private Boolean isInserted(int successfullyExecutedNumber, int requiredExecutionNumber) {
+        return successfullyExecutedNumber == requiredExecutionNumber;
+    }
+    private Boolean isUpdated(int successfullyExecutedNumber, int requiredExecutionNumber) {
+        return successfullyExecutedNumber >= requiredExecutionNumber;
     }
 }

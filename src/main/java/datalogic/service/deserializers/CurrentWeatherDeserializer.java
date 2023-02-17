@@ -48,11 +48,18 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
                             value : Double.valueOf(value).intValue());
                 }else {
                     if(k.equalsIgnoreCase("wind")) {
-                        value = node.findValue("speed").asText();
+                        value = node.path(k).findValue("speed").asText();
                     }else if (k.equalsIgnoreCase("clouds")){ //if it is "clouds"
-                        value = node.findValue("all").asText();
-                    } else if (k.equalsIgnoreCase("temp") || k.equalsIgnoreCase("feels_like")) {
-                        value = "0.0";
+                        value = node.path(k).findValue("all").asText();
+                    } else if (k.equalsIgnoreCase("temp")) {
+                        int tempMin = Double.valueOf(node.path(k).findValue("min").asText()).intValue();
+                        int tempMax = Double.valueOf(node.path(k).findValue("max").asText()).intValue();
+                        value = String.valueOf((tempMax - tempMin)/2 + tempMin);
+                    } else if (k.equalsIgnoreCase("temp_min") || k.equalsIgnoreCase("temp_max")) {
+                        String[] paths = k.split("_");
+                        value = String.valueOf(node.findValue(paths[0]).path(paths[1]));
+                    } else if(k.equalsIgnoreCase("feels_like")){
+                        value = node.path(k).findValue("day").asText();
                     }else if (k.equalsIgnoreCase("city")) {
                         value = "N/A";
                     }

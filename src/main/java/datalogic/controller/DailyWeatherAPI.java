@@ -2,36 +2,31 @@ package datalogic.controller;
 
 import datalogic.model.DailyWeather;
 import datalogic.model.UserLocation;
-import datalogic.repository.WeatherRepoService;
+import datalogic.repository.WeatherRepoServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/weather/daily")
+@RestController
+@RequestMapping("/weather/daily")
 public class DailyWeatherAPI { //returns daily weather forecast
-    private final WeatherRepoService repoService;
+    private final WeatherRepoServiceImpl repoService;
     @Autowired
-    public DailyWeatherAPI(final WeatherRepoService repoService){
+    public DailyWeatherAPI(final WeatherRepoServiceImpl repoService){
         this.repoService = repoService;
     }
 
     @PostMapping
     public ResponseEntity<DailyWeather> getDailyWeatherForCurrentLocation(@RequestBody final UserLocation userLocation){
-        DailyWeather dailyWeatherFromDb = this.repoService.selectDailyWeather(userLocation.getCity());
-        if(dailyWeatherFromDb == null) {
-            dailyWeatherFromDb = this.repoService.updateOrInsertDailyWeather(userLocation.getLat(), userLocation.getLon(), userLocation.getCity());
-            return dailyWeatherFromDb != null ? ResponseEntity.ok(dailyWeatherFromDb) : ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(dailyWeatherFromDb);
+        boolean isAvailable = this.repoService.waitUntilAvailable(userLocation.getCity(), userLocation.getLat(), userLocation.getLon());
+        DailyWeather dailyWeather = isAvailable ? this.repoService.selectDailyWeather(userLocation.getCity()) : null;
+        return dailyWeather != null ? ResponseEntity.ok(dailyWeather) : ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/{city}")
     public ResponseEntity<DailyWeather> getDailyWeatherForCity(@PathVariable("city") String city) {
-        DailyWeather dailyWeatherFromDb = this.repoService.selectDailyWeather(city);
-        if(dailyWeatherFromDb == null) {
-            dailyWeatherFromDb = this.repoService.updateOrInsertDailyWeather(city);
-            return dailyWeatherFromDb != null ? ResponseEntity.ok(dailyWeatherFromDb) : ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(dailyWeatherFromDb);
+        boolean isAvailable = this.repoService.waitUntilAvailable(city);
+        DailyWeather dailyWeather = isAvailable ? this.repoService.selectDailyWeather(city) : null;
+        return dailyWeather != null ? ResponseEntity.ok(dailyWeather) : ResponseEntity.badRequest().build();
     }
 }

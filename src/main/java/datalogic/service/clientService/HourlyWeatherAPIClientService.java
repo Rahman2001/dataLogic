@@ -11,9 +11,10 @@ public interface HourlyWeatherAPIClientService {
     @GET("{path}")
     CompletableFuture<HourlyWeather> getHourlyWeather(@Path("path") String path, @Query("lat") Double lat,
                                                       @Query("lon") Double lon, @Query("appid") String apiKey,
-                                                      @Query("units") String weatherUnit);
+                                                      @Query("cnt") Integer numberOfHours, @Query("units") String weatherUnit);
 
     @GET("{path}")
     CompletableFuture<HourlyWeather> getHourlyWeather(@Path("path") String path, @Query("q") String city,
-                                                      @Query("appid") String apiKey, @Query("units") String weatherUnit);
+                                                      @Query("appid") String apiKey, @Query("cnt") Integer numberOfHours,
+                                                      @Query("units") String weatherUnit);
 }

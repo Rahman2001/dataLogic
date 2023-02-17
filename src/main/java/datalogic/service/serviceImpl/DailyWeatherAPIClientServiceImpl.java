@@ -2,6 +2,7 @@ package datalogic.service.serviceImpl;
 
 import datalogic.config.EndpointProperty;
 import datalogic.model.DailyWeather;
+import datalogic.service.ServiceUtil;
 import datalogic.service.clientService.DailyWeatherAPIClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,9 @@ public class DailyWeatherAPIClientServiceImpl {
     @Autowired
     public DailyWeatherAPIClientServiceImpl(final DailyWeatherAPIClientService dailyWeatherAPIClientService,
                                             final @Qualifier("restEndpoints") List<EndpointProperty> restEndpoints,
-                                            ApiServiceUtil apiServiceUtil){
+                                            ServiceUtil serviceUtil){
         this.dailyWeatherAPIClientService = dailyWeatherAPIClientService;
-        this.endpoint = apiServiceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_dailyWeather_API");
+        this.endpoint = serviceUtil.groupsEndpoints(restEndpoints).get("OpenWeatherMap_dailyWeather_API");
     }
 
     public DailyWeather getDailyWeather(Double lat, Double lon){

@@ -1,5 +1,6 @@
 package datalogic.config;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 @Configuration
 public class FlywayH2Config {
     private final DataSource h2Datasource;
+    private String absolutePathOfFolder;
 
     @Autowired
     public FlywayH2Config(@Qualifier("cacheDbDatasource") DataSource h2Datasource) { // we get a bean called "cacheDbDataSource" and inject it into method argument.
@@ -33,5 +35,9 @@ public class FlywayH2Config {
         log.info("Flyway successfully migrated tables below: ");
         Arrays.stream(flyway.info().applied()).forEach(m->
                 log.info(m.getVersion().getVersion() + m.getDescription() + m.getChecksum()));
+        this.absolutePathOfFolder = flyway.info().current().getPhysicalLocation().replaceAll("\\\\V\\S+", "");
+    }
+    public String getAbsolutePathOfFolder() {
+        return this.absolutePathOfFolder;
     }
 }

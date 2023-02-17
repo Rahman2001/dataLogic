@@ -19,6 +19,9 @@ public class DailyWeatherDeserializer extends CurrentWeatherDeserializer{
     public DailyWeatherDeserializer(Class<DailyWeather> vc) {
         super(vc);
     }
+    public DailyWeatherDeserializer() {
+        super(DailyWeather.class);
+    }
 
     @Override
     public DailyWeather deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {

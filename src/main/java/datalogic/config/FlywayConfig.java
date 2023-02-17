@@ -1,7 +1,10 @@
 package datalogic.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,19 +16,23 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 
 @Slf4j
 @Configuration
 public class FlywayConfig {
 
-    @Value("${app.pooled-db}")
-    private boolean pooledDb;
 
+    private final boolean pooledDb;
+    @Autowired
+    public FlywayConfig(@NonNull @Value("${app.pooled-db}") Boolean pooledDb) {
+        this.pooledDb = pooledDb;
+    }
     @Bean
     @Primary
     @ConfigurationProperties("app.datasource.h2datasource")
     public DataSourceProperties datasourceProperties() {
-        log.info("Pooled connection is enabled: " + pooledDb);
+        log.info("Pooled connection is enabled: " + this.pooledDb);
         return new DataSourceProperties();
     }
 
@@ -35,7 +42,7 @@ public class FlywayConfig {
     public DataSource dataSource() {
         if(pooledDb) { // if configurations in application.yaml file are used in this class, then proceed.
             return this.datasourceProperties().initializeDataSourceBuilder()
-                    .type(HikariDataSource.class).build();
+                    .build();
         }
         else { // otherwise, we configure our datasource manually.
             final DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
@@ -58,7 +65,7 @@ public class FlywayConfig {
     @ConfigurationProperties("app.datasource.cache-db.configuration")
     public DataSource cacheDbDatasource() {
         if(pooledDb) {
-            return this.cacheDbDataSourceProperties().initializeDataSourceBuilder().type(HikariDataSource.class).build();
+            return this.cacheDbDataSourceProperties().initializeDataSourceBuilder().build();
         }
         else {
             final DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();

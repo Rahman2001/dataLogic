@@ -1,6 +1,5 @@
 package datalogic.service.serviceImpl;
 
-import datalogic.config.EndpointProperty;
 import datalogic.model.DailyWeather;
 import datalogic.model.HourlyWeather;
 import datalogic.model.Weather;
@@ -13,8 +12,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 @Service
 public class ApiServiceUtil {
@@ -30,9 +27,6 @@ public class ApiServiceUtil {
         this.dailyWeatherService = dailyWeatherAPIClientService;
     }
 
-    public Map<String, EndpointProperty> groupsEndpoints(List<EndpointProperty> endpointProperties) {
-        return endpointProperties.stream().collect(toImmutableMap(EndpointProperty::getServiceName, Function.identity()));
-    }
     public Map<String, ? extends Weather> callAll(@NotNull String city) {
         List<CompletableFuture<? extends Weather>> weathers = this.getAllWeathers(city);
         return CompletableFuture.allOf(weathers.toArray(CompletableFuture[]::new))

@@ -15,7 +15,7 @@ public class WeatherRowMapper implements RowMapper<Weather> {
     public Weather mapRow(ResultSet rs, int rowNum) throws SQLException {
         Weather weather = null;
         try {
-            if (rs.next()) {
+            if ((rs.isBeforeFirst() && rs.next()) || (!rs.isAfterLast())) {
                 weather = Weather.builder()
                         .city(rs.getString("city"))
                         .country(rs.getString("country"))
