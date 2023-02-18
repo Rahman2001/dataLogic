@@ -5,4 +5,3 @@ CREATE TABLE IF NOT EXISTS locations
 country VARCHAR(25),
 updated_time DATETIME DEFAULT NOW()
 );
-# INSERT INTO locations (city, country) VALUES ("Ankara", "Turkey");

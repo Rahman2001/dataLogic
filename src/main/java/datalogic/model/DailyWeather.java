@@ -1,7 +1,10 @@
 package datalogic.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonValueInstantiator;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import datalogic.service.deserializers.DailyWeatherDeserializer;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,7 +18,6 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @JsonDeserialize(using = DailyWeatherDeserializer.class)
 public class DailyWeather extends Weather{
-    private String api_name = "daily_weather";
     @JsonProperty("cnt")
     private Integer forecastedTotalDays;
     @JsonProperty("list")

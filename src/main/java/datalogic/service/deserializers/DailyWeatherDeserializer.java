@@ -26,6 +26,7 @@ public class DailyWeatherDeserializer extends CurrentWeatherDeserializer{
     @Override
     public DailyWeather deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode node = p.getCodec().readTree(p);
+        super.setOffsetTimeZone(node.findValue("timezone").asLong());
         return getDailyWeather(node, ctxt);
     }
     private DailyWeather getDailyWeather(JsonNode node, DeserializationContext ctxt) {

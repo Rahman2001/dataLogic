@@ -104,7 +104,7 @@ public class WeatherRepoService {
 
         hourlyWeather.getHourlyWeatherList().forEach(weather -> {
             Object[] valuesOfWeather = new Object[]{
-                    hourlyWeather.getCity(), weather.getCountry(), weather.getDescription(),
+                    hourlyWeather.getCity(), hourlyWeather.getCountry(), weather.getDescription(),
                     weather.getDateTime(), weather.getTemp(), weather.getTempMin(),
                     weather.getTempMax(), weather.getPressure(), weather.getHumidity(),
                     weather.getWind(), weather.getFeelsLike(), weather.getClouds()};
@@ -116,15 +116,15 @@ public class WeatherRepoService {
 
     public Boolean insertedDailyWeather(@NotNull DailyWeather dailyWeather) {
         String parameterizedQuery = "INSERT INTO Daily_Weather" +
-                " (city, country, description, date_time, temp, temp_min, temp_max, pressure, humidity, wind, clouds) " +
-                "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+                " (city, country, description, date_time, temp, temp_min, temp_max, feels_like, pressure, humidity, wind, clouds) " +
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
         List<Object[]> values = new ArrayList<>();
 
         dailyWeather.getDailyWeatherList().forEach(weather -> {
             Object[] valuesOfWeather = new Object[]{
-                    dailyWeather.getCity(), weather.getCountry(), weather.getDescription(),
+                    dailyWeather.getCity(), dailyWeather.getCountry(), weather.getDescription(),
                     weather.getDateTime(), weather.getTemp(), weather.getTempMin(),
-                    weather.getTempMax(), weather.getPressure(), weather.getHumidity(),
+                    weather.getTempMax(), weather.getFeelsLike(), weather.getPressure(), weather.getHumidity(),
                     weather.getWind(), weather.getClouds()};
             values.add(valuesOfWeather);
         });
@@ -170,15 +170,15 @@ public class WeatherRepoService {
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource("city", hourlyWeather.getCity());
         this.namedParameterJdbcTemplate.execute(deleteQuery, mapSqlParameterSource, PreparedStatement::executeUpdate);
             String parameterizedQuery = "INSERT INTO Hourly_Weather (date_time, description, temp, temp_min, temp_max, " +
-                    "feels_like, pressure, humidity, wind, clouds, city) " +
-                    "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+                    "feels_like, pressure, humidity, wind, clouds, city, country) " +
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
             List<Object[]> values = new ArrayList<>();
             hourlyWeather.getHourlyWeatherList().forEach(weather -> {
                 Object[] valuesOfWeather = new Object[]{
                         weather.getDateTime(), weather.getDescription(),
                         weather.getTemp(), weather.getTempMin(), weather.getTempMax(),
                         weather.getFeelsLike(), weather.getPressure(), weather.getHumidity(),
-                        weather.getWind(), weather.getClouds(), hourlyWeather.getCity()};
+                        weather.getWind(), weather.getClouds(), hourlyWeather.getCity(), hourlyWeather.getCountry()};
                 values.add(valuesOfWeather);
             });
             CompletableFuture<Integer> executedNumber = this.executedBatchNumber(parameterizedQuery, values);
@@ -190,15 +190,15 @@ public class WeatherRepoService {
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource("city", dailyWeather.getCity());
         this.namedParameterJdbcTemplate.execute(deleteQuery, mapSqlParameterSource, PreparedStatement::executeUpdate);
             String parameterizedQuery = "INSERT INTO Daily_Weather " +
-                    "(date_time, description, temp, temp_min, temp_max, pressure, humidity, wind, clouds, city) " +
-                    "VALUES(?,?,?,?,?,?,?,?,?,?)";
+                    "(date_time, description, temp, temp_min, temp_max, feels_like, pressure, humidity, wind, clouds, city, country) " +
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
             List<Object[]> values = new ArrayList<>();
             dailyWeather.getDailyWeatherList().forEach(weather -> {
                 Object[] valuesOfWeather = new Object[]{
                         weather.getDateTime(), weather.getDescription(),
                         weather.getTemp(), weather.getTempMin(), weather.getTempMax(),
-                        weather.getPressure(), weather.getHumidity(),
-                        weather.getWind(), weather.getClouds(), dailyWeather.getCity()};
+                        weather.getFeelsLike(), weather.getPressure(), weather.getHumidity(),
+                        weather.getWind(), weather.getClouds(), dailyWeather.getCity(), dailyWeather.getCountry()};
                 values.add(valuesOfWeather);
             });
             CompletableFuture<Integer> executedNumber = this.executedBatchNumber(parameterizedQuery, values);

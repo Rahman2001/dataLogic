@@ -2,6 +2,7 @@ package datalogic.repository;
 
 import datalogic.model.DailyWeather;
 import datalogic.model.HourlyWeather;
+import datalogic.model.UserLocation;
 import datalogic.model.Weather;
 import datalogic.service.serviceImpl.ApiServiceUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,6 @@ All needed configurations are in TaskSchedulerConfig.java
 @Slf4j
 public class WeatherDataUpdateService implements Runnable{
 
-    private String databaseLocation;
     private final WeatherRepoService weatherRepoService;
     private final static Queue<Map<String, LocalDateTime>> citiesToUpdate = new ConcurrentLinkedQueue<>();
     private final ApiServiceUtil apiServiceUtil;
@@ -34,13 +34,12 @@ public class WeatherDataUpdateService implements Runnable{
                                     @Value("${spring.database.geolocation}") final String databaseLocation) {
         this.weatherRepoService = weatherRepoService;
         this.apiServiceUtil = apiServiceUtil;
-        this.databaseLocation = databaseLocation;
         if(citiesToUpdate.isEmpty() && !this.weatherRepoService.exists(databaseLocation)) {
             this.insertedAll(databaseLocation);
         }else {
             setQueueMap();
         }
-        log.info("Database geolocation : " + this.databaseLocation);
+        log.info("Database geolocation : " + databaseLocation);
     }
 
     public void updateDataBySchedule() {
@@ -54,9 +53,9 @@ public class WeatherDataUpdateService implements Runnable{
         Map<String, ? extends Weather> weathers = this.apiServiceUtil.callAll(city);
         return getStringMap(city, weathers);
     }
-    private Map<String, ? extends Weather> loadWeathersFromExternalProvider(Double lat, Double lon, String city) {
-        Map<String, ? extends Weather> weathers = this.apiServiceUtil.callAll(lat, lon);
-        return getStringMap(city, weathers);
+    private Map<String, ? extends Weather> loadWeathersFromExternalProvider(UserLocation userLocation) {
+        Map<String, ? extends Weather> weathers = this.apiServiceUtil.callAll(userLocation.getLat(), userLocation.getLon());
+        return getStringMap(userLocation.getCity(), weathers);
     }
 
     @NotNull
@@ -66,22 +65,10 @@ public class WeatherDataUpdateService implements Runnable{
         String country = currentWeather.getCountry();
 
         HourlyWeather hourlyWeather = (HourlyWeather) weathers.get(HourlyWeather.class.getName());
-        List<Weather> list = hourlyWeather.getHourlyWeatherList();
-        list.forEach(w-> {
-            w.setCity(city);
-            w.setCountry(country);
-        });
-        hourlyWeather.setHourlyWeatherList(list);
         hourlyWeather.setCity(city);
         hourlyWeather.setCountry(country);
 
         DailyWeather dailyWeather = (DailyWeather) weathers.get(DailyWeather.class.getName());
-        list = dailyWeather.getDailyWeatherList();
-        list.forEach(w-> {
-            w.setCity(city);
-            w.setCountry(country);
-        });
-        dailyWeather.setDailyWeatherList(list);
         dailyWeather.setCity(city);
         dailyWeather.setCountry(country);
         return weathers;
@@ -101,8 +88,8 @@ public class WeatherDataUpdateService implements Runnable{
         DailyWeather dailyWeather = (DailyWeather) map.get(DailyWeather.class.getName());
         return this.weatherRepoService.insertedAllWeather(currentWeather, hourlyWeather, dailyWeather);
     }
-    public Boolean insertedAll(Double lat, Double lon, String city) {
-        Map<String, ? extends Weather> map = this.loadWeathersFromExternalProvider(lat, lon, city);
+    public Boolean insertedAll(UserLocation userLocation) {
+        Map<String, ? extends Weather> map = this.loadWeathersFromExternalProvider(userLocation);
         Weather currentWeather = map.get(Weather.class.getName());
         HourlyWeather hourlyWeather = (HourlyWeather) map.get(HourlyWeather.class.getName());
         DailyWeather dailyWeather = (DailyWeather) map.get(DailyWeather.class.getName());

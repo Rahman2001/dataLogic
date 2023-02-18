@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS current_weather
 (id BIGINT NOT NULL PRIMARY KEY auto_increment ,
 city VARCHAR(25),
 country VARCHAR(25),
-date_time VARCHAR(25),
+date_time DATETIME,
 temp INT,
 temp_min INT,
 temp_max INT,

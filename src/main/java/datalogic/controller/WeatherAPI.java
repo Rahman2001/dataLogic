@@ -19,7 +19,7 @@ public class WeatherAPI { //returns current weather data
 
     @PostMapping
     public ResponseEntity<Weather> getCurrentWeatherOfCurrentLocation(@RequestBody final UserLocation userLocation) {
-        boolean isAvailable = this.repoService.waitUntilAvailable(userLocation.getCity(), userLocation.getLat(), userLocation.getLon());
+        boolean isAvailable = this.repoService.waitUntilAvailable(userLocation);
         Weather currentWeatherFromDb = isAvailable ? this.repoService.selectCurrentWeather(userLocation.getCity()) : null;
         return currentWeatherFromDb != null ? ResponseEntity.ok(currentWeatherFromDb) : ResponseEntity.badRequest().build();
     }

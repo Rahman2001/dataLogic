@@ -7,15 +7,16 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
 
+import java.sql.Timestamp;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @JsonDeserialize(using = CurrentWeatherDeserializer.class)
 public class Weather {
-    private String api_name = "current_weather";
     @JsonProperty("dt")
-    private String dateTime;
+    private Timestamp dateTime;
     @JsonProperty("description")
     private String description;
     @JsonProperty("temp")

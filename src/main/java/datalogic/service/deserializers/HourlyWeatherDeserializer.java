@@ -25,6 +25,7 @@ public class HourlyWeatherDeserializer extends CurrentWeatherDeserializer{
     @Override
     public HourlyWeather deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode node = p.getCodec().readTree(p);
+        super.setOffsetTimeZone(node.findValue("timezone").asLong());
         return getHourlyWeather(node, ctxt);
     }
     private HourlyWeather getHourlyWeather(JsonNode node, DeserializationContext ctxt) {

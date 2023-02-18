@@ -2,6 +2,7 @@ package datalogic.repository;
 
 import datalogic.model.DailyWeather;
 import datalogic.model.HourlyWeather;
+import datalogic.model.UserLocation;
 import datalogic.model.Weather;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -41,13 +42,13 @@ public class WeatherRepoServiceImpl {
         }
         return isAvailable;
     }
-    public Boolean waitUntilAvailable(String city, Double lat, Double lon) {
+    public Boolean waitUntilAvailable(@NotNull UserLocation userLocation) {
         boolean isAvailable = false;
-        if(!this.weatherRepoService.exists(city)) {
-            boolean isInserted = this.weatherDataUpdateService.insertedAll(lat, lon, city);
+        if(!this.weatherRepoService.exists(userLocation.getCity())) {
+            boolean isInserted = this.weatherDataUpdateService.insertedAll(userLocation);
             if(isInserted) {
                 log.info("\n---All weather data are inserted and ready for use: " + isInserted);
-                this.weatherDataUpdateService.putCityInQueueForUpdate(city, LocalDateTime.now());
+                this.weatherDataUpdateService.putCityInQueueForUpdate(userLocation.getCity(), LocalDateTime.now());
                 isAvailable = isInserted;
             }else {
                 log.error("\n--Some error occurred during insertion!--\n");

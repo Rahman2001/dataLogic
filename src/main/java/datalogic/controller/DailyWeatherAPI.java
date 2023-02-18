@@ -18,7 +18,7 @@ public class DailyWeatherAPI { //returns daily weather forecast
 
     @PostMapping
     public ResponseEntity<DailyWeather> getDailyWeatherForCurrentLocation(@RequestBody final UserLocation userLocation){
-        boolean isAvailable = this.repoService.waitUntilAvailable(userLocation.getCity(), userLocation.getLat(), userLocation.getLon());
+        boolean isAvailable = this.repoService.waitUntilAvailable(userLocation);
         DailyWeather dailyWeather = isAvailable ? this.repoService.selectDailyWeather(userLocation.getCity()) : null;
         return dailyWeather != null ? ResponseEntity.ok(dailyWeather) : ResponseEntity.badRequest().build();
     }

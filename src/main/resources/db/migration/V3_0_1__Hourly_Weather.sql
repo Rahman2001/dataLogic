@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS hourly_weather
 (id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 city VARCHAR(25),
 country VARCHAR(25),
-date_time VARCHAR(25),
+date_time DATETIME,
 description VARCHAR(25),
 temp INT,
 temp_min INT,

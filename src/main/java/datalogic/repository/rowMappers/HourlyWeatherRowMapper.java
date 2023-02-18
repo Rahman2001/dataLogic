@@ -26,7 +26,6 @@ public class HourlyWeatherRowMapper implements RowMapper<HourlyWeather> {
             hourlyWeather = HourlyWeather.builder()
                     .forecastedTotalHours(weatherList.size())
                     .hourlyWeatherList(weatherList)
-                    .city(weatherList.get(0).getCity())
                     .build();
         }
         catch (SQLException e) {

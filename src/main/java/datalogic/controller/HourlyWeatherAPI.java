@@ -19,7 +19,7 @@ public class HourlyWeatherAPI { //returns hourly weather forecast
 
     @PostMapping
     public ResponseEntity<HourlyWeather> getHourlyWeatherOfCurrentLocation(@RequestBody final UserLocation userLocation){
-       boolean isAvailable = this.repoService.waitUntilAvailable(userLocation.getCity(), userLocation.getLat(), userLocation.getLon());
+       boolean isAvailable = this.repoService.waitUntilAvailable(userLocation);
        HourlyWeather hourlyWeather = isAvailable ? this.repoService.selectHourlyWeather(userLocation.getCity()) : null;
        return hourlyWeather != null ? ResponseEntity.ok(hourlyWeather) : ResponseEntity.badRequest().build();
     }

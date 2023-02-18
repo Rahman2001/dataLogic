@@ -7,14 +7,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import datalogic.model.Weather;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.text.DateFormatter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.*;
 
 @Slf4j
 public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
+    private Long offsetTimeZone;
     private List<String> jsonPropertyValues;
     public CurrentWeatherDeserializer(Class<? extends Weather> vc) {
         super(vc);
@@ -26,6 +34,9 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
     @Override
     public Weather deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode node = p.getCodec().readTree(p);
+        if(this.offsetTimeZone == null) {
+            setOffsetTimeZone(node.findValue("timezone").asLong());
+        }
         Class<Weather> cl = Weather.class;
         Field[] fields = cl.getDeclaredFields();
         this.jsonPropertyValues = Arrays.stream(fields).filter(f -> f.getDeclaredAnnotation(JsonProperty.class) != null)
@@ -42,35 +53,39 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
         Set<String> keys = keysToFindInJSONResponse.keySet();
         keys.forEach(k -> {
             String value = node.findValue(k) != null ? node.findValue(k).asText() : null;
-            if (value != null) {
-                if (!value.isEmpty()) {
-                    keysToFindInJSONResponse.replace(k, keysToFindInJSONResponse.get(k).equals(String.class.getSimpleName()) ?
-                            value : Double.valueOf(value).intValue());
+                if (Objects.nonNull(value) && !value.isEmpty()) {
+                    Object type = keysToFindInJSONResponse.get(k);
+                    if(type.equals(String.class.getSimpleName()) || type.equals(Integer.class.getSimpleName())) {
+                        keysToFindInJSONResponse.replace(k, keysToFindInJSONResponse.get(k).equals(String.class.getSimpleName()) ?
+                                value : Double.valueOf(value).intValue());
+                    }else {
+                        Timestamp timestamp = this.convertUnixToTimestamp(Long.valueOf(value), this.offsetTimeZone);
+                        keysToFindInJSONResponse.replace(k, timestamp); // if it is of type Timestamp
+                    }
                 }else {
-                    if(k.equalsIgnoreCase("wind")) {
-                        value = node.path(k).findValue("speed").asText();
-                    }else if (k.equalsIgnoreCase("clouds")){ //if it is "clouds"
+                    if (k.equalsIgnoreCase("wind")) {
+                        value = node.findValue("speed").asText();
+                    } else if (k.equalsIgnoreCase("clouds")) { //if it is "clouds"
                         value = node.path(k).findValue("all").asText();
                     } else if (k.equalsIgnoreCase("temp")) {
                         int tempMin = Double.valueOf(node.path(k).findValue("min").asText()).intValue();
                         int tempMax = Double.valueOf(node.path(k).findValue("max").asText()).intValue();
-                        value = String.valueOf((tempMax - tempMin)/2 + tempMin);
+                        value = String.valueOf((tempMax - tempMin) / 2 + tempMin);
                     } else if (k.equalsIgnoreCase("temp_min") || k.equalsIgnoreCase("temp_max")) {
                         String[] paths = k.split("_");
-                        value = String.valueOf(node.findValue(paths[0]).path(paths[1]));
-                    } else if(k.equalsIgnoreCase("feels_like")){
+                        value = String.valueOf(node.path(paths[0]).findValue(paths[1]));
+                    } else if (k.equalsIgnoreCase("feels_like")) {
                         value = node.path(k).findValue("day").asText();
-                    }else if (k.equalsIgnoreCase("city")) {
+                    } else if (k.equalsIgnoreCase("city")) {
                         value = "N/A";
+                    } else {
+                        value = "0.0";
                     }
+
                     keysToFindInJSONResponse.replace(k, keysToFindInJSONResponse.get(k).equals(String.class.getSimpleName()) ?
                             value : Double.valueOf(value).intValue());
+
                 }
-            }
-            else {
-                keysToFindInJSONResponse.replace(k, keysToFindInJSONResponse.get(k).equals(String.class.getSimpleName()) ?
-                        "N/A" : 0);
-            }
         });
     }
 
@@ -106,11 +121,10 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
     }
     private Weather getWeather(@NotNull Map<String, Object> fieldMap) {
         return Weather.builder()
-                .api_name("current_weather")
                 .city((String) fieldMap.get("city"))
                 .country((String) fieldMap.get("country"))
                 .clouds((Integer) fieldMap.get("clouds"))
-                .dateTime((String) fieldMap.get("dateTime"))
+                .dateTime((Timestamp) fieldMap.get("dateTime"))
                 .description((String) fieldMap.get("description"))
                 .feelsLike((Integer) fieldMap.get("feelsLike"))
                 .humidity((Integer) fieldMap.get("humidity"))
@@ -119,5 +133,17 @@ public class CurrentWeatherDeserializer extends StdDeserializer<Weather> {
                 .tempMax((Integer) fieldMap.get("tempMax"))
                 .tempMin((Integer) fieldMap.get("tempMin"))
                 .wind((Integer) fieldMap.get("wind")).build();
+    }
+    private Timestamp convertUnixToTimestamp(Long unixTime, Long offsetFromTimeZone) {
+        Instant instant = Instant.ofEpochSecond(unixTime);
+        instant.atOffset(ZoneOffset.ofTotalSeconds(offsetFromTimeZone.intValue()));
+        instant.atZone(ZoneId.of("UTC"));
+        Date date = Date.from(instant);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+        return Timestamp.valueOf(dateFormat.format(date));
+    }
+    protected void setOffsetTimeZone(Long offsetTimeZone) {
+        this.offsetTimeZone = offsetTimeZone;
     }
 }

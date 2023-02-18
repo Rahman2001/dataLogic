@@ -23,7 +23,7 @@ public class WeatherRowMapper implements RowMapper<Weather> {
                         .temp(rs.getInt("temp"))
                         .tempMin(rs.getInt("temp_min"))
                         .tempMax(rs.getInt("temp_max"))
-                        .dateTime(rs.getString("date_time"))
+                        .dateTime(rs.getTimestamp("date_time"))
                         .wind(rs.getInt("wind"))
                         .humidity(rs.getInt("humidity"))
                         .feelsLike(rs.getInt("feels_like"))

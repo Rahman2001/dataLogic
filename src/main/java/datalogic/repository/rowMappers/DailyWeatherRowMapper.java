@@ -26,7 +26,6 @@ public class DailyWeatherRowMapper implements RowMapper<DailyWeather> {
             dailyWeather = DailyWeather.builder()
                     .forecastedTotalDays(weatherList.size())
                     .dailyWeatherList(weatherList)
-                    .city(weatherList.get(0).getCity())
                     .build();
         }
         catch (SQLException e) {
