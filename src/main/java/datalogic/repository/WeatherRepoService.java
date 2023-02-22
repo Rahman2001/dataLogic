@@ -6,7 +6,6 @@ import datalogic.model.Weather;
 import datalogic.repository.rowMappers.DailyWeatherRowMapper;
 import datalogic.repository.rowMappers.HourlyWeatherRowMapper;
 import datalogic.repository.rowMappers.WeatherRowMapper;
-import datalogic.service.FlywayMigrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,10 @@ import java.util.concurrent.CompletableFuture;
 public class WeatherRepoService {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final FlywayMigrationService flywayMigrationService;
 
     @Autowired
-    public WeatherRepoService(NamedParameterJdbcTemplate namedParameterJdbcTemplate,
-                              FlywayMigrationService flywayMigrationService){
+    public WeatherRepoService(NamedParameterJdbcTemplate namedParameterJdbcTemplate){
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.flywayMigrationService = flywayMigrationService;
     }
 
     @Async
@@ -92,7 +88,7 @@ public class WeatherRepoService {
                 currentWeather.getHumidity(), currentWeather.getWind(), currentWeather.getFeelsLike(),
                 currentWeather.getClouds(), currentWeather.getCity(), currentWeather.getCountry()};
         int updatedNumber = this.namedParameterJdbcTemplate.getJdbcTemplate().update(query, values);
-        return this.isInserted(updatedNumber, 1);
+        return updatedNumber == 1;
     }
 
     //we used Batch operation to minimise network trips between application and database.
@@ -111,7 +107,7 @@ public class WeatherRepoService {
             values.add(valuesOfWeather);
         });
         CompletableFuture<Integer> executedBatchNumber = this.executedBatchNumber(parameterizedQuery, values);
-        return this.isInserted(executedBatchNumber.join(), 1);
+        return executedBatchNumber.join() == 1;
     }
 
     public Boolean insertedDailyWeather(@NotNull DailyWeather dailyWeather) {
@@ -129,7 +125,7 @@ public class WeatherRepoService {
             values.add(valuesOfWeather);
         });
         CompletableFuture<Integer> executedBatchNumber = this.executedBatchNumber(parameterizedQuery, values);
-        return this.isInserted(executedBatchNumber.join(), 1);
+        return executedBatchNumber.join() == 1;
     }
     public Boolean insertedLocation(@NotNull String cityName, @NotNull String countryName) {
         String query = "INSERT INTO locations (city, country) VALUES (:city, :country)";
@@ -137,8 +133,7 @@ public class WeatherRepoService {
         locationMap.put("city", cityName);
         locationMap.put("country", countryName);
         MapSqlParameterSource parameterSource = new MapSqlParameterSource(locationMap);
-        int updatedNumber = this.namedParameterJdbcTemplate.update(query, parameterSource);
-        return this.isInserted(updatedNumber, 1);
+        return this.namedParameterJdbcTemplate.update(query, parameterSource) == 1;
     }
 
     public Boolean updatedAllWeathers(@NotNull Weather weather, @NotNull HourlyWeather hourlyWeather, @NotNull DailyWeather dailyWeather) {
@@ -162,7 +157,7 @@ public class WeatherRepoService {
                 weather.getPressure(), weather.getHumidity(), weather.getWind(),
                 weather.getClouds(), weather.getCity()};
         int updatedRows = this.namedParameterJdbcTemplate.getJdbcTemplate().update(parameterizedQuery, values);
-        return this.isUpdated(updatedRows, 1);
+        return updatedRows == 1;
     }
     @SuppressWarnings("all")
     public Boolean updatedHourlyWeather(@NotNull HourlyWeather hourlyWeather) {
@@ -182,7 +177,7 @@ public class WeatherRepoService {
                 values.add(valuesOfWeather);
             });
             CompletableFuture<Integer> executedNumber = this.executedBatchNumber(parameterizedQuery, values);
-            return this.isUpdated(executedNumber.join(), 1);
+            return executedNumber.join() == 1;
     }
     @SuppressWarnings("all")
     public Boolean updatedDailyWeather(@NotNull DailyWeather dailyWeather) {
@@ -202,15 +197,14 @@ public class WeatherRepoService {
                 values.add(valuesOfWeather);
             });
             CompletableFuture<Integer> executedNumber = this.executedBatchNumber(parameterizedQuery, values);
-            return this.isUpdated(executedNumber.join(), 1);
+            return executedNumber.join() == 1;
     }
     public Boolean updatedLocation(@NotNull String city) {
         String query = "UPDATE locations SET updated_time = NOW() WHERE city = :city";
         Map<String, String> locationMap = new HashMap<>();
         locationMap.put("city", city);
         MapSqlParameterSource parameterSource = new MapSqlParameterSource(locationMap);
-        int updatedNumber = this.namedParameterJdbcTemplate.update(query, parameterSource);
-        return this.isUpdated(updatedNumber, 1);
+        return this.namedParameterJdbcTemplate.update(query, parameterSource) == 1;
     }
 
     @Async
@@ -222,14 +216,5 @@ public class WeatherRepoService {
             }
             ps.executeBatch();
         }));
-    }
-
-    //All methods below check if queries are executed successfully and inserts SQL scripts into the file (.sql) of corresponding table.
-    //We insert SQL scripts into the file because when application is rerun, all the modification in tables could take place in other users' app (for development and test purposes only).
-    private Boolean isInserted(int successfullyExecutedNumber, int requiredExecutionNumber) {
-        return successfullyExecutedNumber == requiredExecutionNumber;
-    }
-    private Boolean isUpdated(int successfullyExecutedNumber, int requiredExecutionNumber) {
-        return successfullyExecutedNumber >= requiredExecutionNumber;
     }
 }
